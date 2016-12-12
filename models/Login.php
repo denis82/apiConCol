@@ -129,5 +129,18 @@ class Login extends Model
 		return true;
 		}
 		
-	} 
+	}
+	
+	public function logout($token)
+	{
+		$user = User::find()
+					->where(['access_token' => explode(' ',$token)[1]])
+					->one();
+		$user->access_token = '';
+		if($user->save()) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 }

@@ -10,7 +10,7 @@ use yii\db\ActiveRecord;
 class User extends ActiveRecord implements IdentityInterface
 {
 // 	// логин пользователя
-// 	public $email;
+ 	public $id;
 // 	
 // 	// пароль пользователя
 // 	public $password;
@@ -42,7 +42,9 @@ class User extends ActiveRecord implements IdentityInterface
     
     public function getId()
     {
+		//var_dump($this->idUser);die();
     
+		return $this->idUser;
     }
     
     public function getAuthKey()

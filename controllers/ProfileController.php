@@ -146,7 +146,16 @@ class ProfileController extends MainapiController
 	
 	public function actionLogout()
 	{
-	
+		$headers = Yii::$app->request->headers;
+		$loginModel = new Login();
+
+		if ($headers->get('authorization')) {
+			$result = $loginModel->logout($headers->get('authorization'));
+		}
+		$this->tempArray['success'] = $result;
+		$this->datas[self::DATAS] = $this->tempArray;
+		return $this->datas;
+		
 	}
 	
 	/*  Проверяет зарегестрирован ли человек на событие
