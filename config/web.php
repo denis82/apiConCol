@@ -6,6 +6,8 @@ $config = [
     'id' => 'basic',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
+    'language' => 'ru-RU',
+    'sourceLanguage' => 'en-US',
     'components' => [
         'request' => [
             'parsers' => [
@@ -75,9 +77,23 @@ $config = [
                 
             ],
         ],
+        'i18n' => [
+            'translations' => [
+                'app*' => [
+                    
+                    'class' => 'yii\i18n\PhpMessageSource',
+                    'basePath' => '@app/messages',
+                    'fileMap' => [
+                        'app' => 'app.php',
+                        'app/error' => 'error.php',
+                    ],
+                ],
+            ],
+       ],
         
     ],
     'params' => $params,
+    
 ];
 
 if (YII_ENV_DEV) {

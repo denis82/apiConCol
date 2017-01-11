@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use Yii;
 use app\models\User;
 use yii\base\Model;
 
@@ -27,7 +28,20 @@ class Registration extends Model
 	{
 		$user = new User();
 		$user->email = $this->email;
-		$user->password = sha1($this->password);
+		$user->password = Yii::$app->getSecurity()->generatePasswordHash($this->password);//sha1($this->password);
+		$user->createdAt = date('Y-m-d');
+		$user->lastLoginTime = date('Y-m-d');
+		$user->lastLoginIp = ip2long($this->userIp);
+		$user->access_token = $this->token;
+		//var_dump($user); die();
+		$user->save();
+	} 
+	
+	public function changePass()
+	{
+		$user = new User();
+		$user->email = $this->email;
+		$user->password = Yii::$app->getSecurity()->generatePasswordHash($this->password);//sha1($this->password);
 		$user->createdAt = date('Y-m-d');
 		$user->lastLoginTime = date('Y-m-d');
 		$user->lastLoginIp = ip2long($this->userIp);

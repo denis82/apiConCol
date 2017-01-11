@@ -68,6 +68,7 @@ class ApiController extends Controller
     
 	public function actionIndex()
 	{
+		return  "asdf";
 	}
 	public function actionRegistration()
     {

@@ -29,7 +29,13 @@ class User extends ActiveRecord implements IdentityInterface
 // 	
 // 	// дата обновления пользователя
 // 	public $updatedAt;
-	
+
+	public function getPhonemaildatas()
+    {
+		//var_dump($this->hasMany(Phonemaildata::className(), ['idPerson' => 'idPerson']));die;
+        return $this->hasMany(Phonemaildata::className(), ['idPerson' => 'idUser']);
+    }
+
 	public static function findIdentityByAccessToken($token, $type = null)
     {
 		//var_dump( $token);die();

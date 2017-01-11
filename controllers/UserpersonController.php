@@ -29,7 +29,7 @@ class UserpersonController extends MainapiController
 	public $bornDate = 'bornDate';
 	public $findName = 'findName';
 	public $datas = [];
-	public $tempArray = [];
+	//public $tempArray = [];
 
         
 
@@ -50,6 +50,7 @@ class UserpersonController extends MainapiController
 		if (!empty($temp)) {
 			$userInfo = Userprofile::findAll($temp);
 			foreach($userInfo as $res){
+				$tempArray['foo'] = $res->phonemaildatas;
 				$tempArray['id'] = $res->idPerson;
 				$tempArray['date'] = $res->bornDate;
 				$tempArray['image'] = $res->image;
@@ -57,13 +58,14 @@ class UserpersonController extends MainapiController
 				$tempArray['name'] = $res->name;
 				$tempArray['surname'] = $res->surname;
 				$tempArray['middlename'] = $res->middlename;
-				//$tempArray['fields'] = $res->fields;
-				//$tempArray['sort'] = $res->sort;
 				$tempArray['access'] = $res->u_access;
 				//$this->tempArray['status'] = $res->status;
 				$this->tempArray[] = $tempArray;
 			}
+		}else {
+			$this->tempArray[] = [];
 		}
+		//var_dump($userInfo);die();
 		$this->datas[self::DATAS] = $this->tempArray;
 //echo $component->beforeValidate();
 //$component->prop1 = 'dfgd';
@@ -84,26 +86,30 @@ class UserpersonController extends MainapiController
 				$this->tempArray[] = $sbscr->idEvent;
 			} 
 			
-		}	
+		}	else {
+			$this->tempArray[] = [];
+		}
 		$this->datas[self::DATAS] = $this->tempArray;
 		//$this->datas = $CardStack;
 		return $this->datas; 
 	}
 	
-	public function simpleArray($array)
-    {
-		$temp = [];
-		if (null != $array and is_array($array)) {
-			foreach ($array as $key => $id) {  // в цикле валидируются входные данные
-				if (!is_array($id)) {
-					if((int)$id) {
-						$temp[] =(int)$id;
-					}
-				}
-			}
-        } else {
-			$temp = [];
-        }
-		return $temp;
-    }
+	
+	
+// 	public function simpleArray($array)
+//     {
+// 		$temp = [];
+// 		if (null != $array and is_array($array)) {
+// 			foreach ($array as $key => $id) {  // в цикле валидируются входные данные
+// 				if (!is_array($id)) {
+// 					if((int)$id) {
+// 						$temp[] =(int)$id;
+// 					}
+// 				}
+// 			}
+//         } else {
+// 			$temp = [];
+//         }
+// 		return $temp;
+//     }
 }

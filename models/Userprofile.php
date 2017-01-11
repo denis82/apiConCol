@@ -3,12 +3,14 @@
 namespace app\models;
 
 use yii\db\ActiveRecord;
+use app\models\Phonemaildata;
 
 class Userprofile extends ActiveRecord
 {
-	public function getPhonemaildata()
+	public function getPhonemaildatas()
     {
-        return $this->hasOne(Phonemaildata::className(), ['idPerson' => 'idPerson']);
+		//var_dump($this->hasMany(Phonemaildata::className(), ['idPerson' => 'idPerson']));die;
+        return $this->hasMany(Phonemaildata::className(), ['idPerson' => 'idPerson']);
     }
 
     

@@ -50,9 +50,8 @@ class Login extends Model
 
         if (!$this->hasErrors()) {
             $user = User::findOne(['email' => $this->email]);
-
-            if (!$user || ($user->password != sha1($this->password)) ){
-                $this->addError($attribute, 'Ïàðîëü èëè ïîëüçîâàòåëü ââåäåí íåâåðíî.');
+            if (!Yii::$app->getSecurity()->validatePassword($this->password, $user->password)){
+                $this->addError($attribute, 'Пароль не верный.');
             }
         }
     }
@@ -124,7 +123,7 @@ class Login extends Model
 		$user = User::find()
 					->where(['email' => $this->email])
 					->one();
-		$user->password = sha1($this->newPassword);
+		$user->password = Yii::$app->getSecurity()->generatePasswordHash($this->newPassword);
 		if($user->save()) {
 		return true;
 		}

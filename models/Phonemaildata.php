@@ -8,7 +8,7 @@ class Phonemaildata extends ActiveRecord
 {
 	public function getUserprofile()
     {
-        return $this->hasMany(Userprofile::className(), ['idPerson' => 'idPerson']);
+        return $this->hasOne(User::className(), ['idUser' => 'idPerson']);
     }
     /**
      * @return string название таблицы, сопоставленной с этим ActiveRecord-классом.
