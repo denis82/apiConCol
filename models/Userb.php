@@ -7,7 +7,7 @@ use yii\web\IdentityInterface;
 use app\components\MyBehavior;
 use yii\db\ActiveRecord;
 
-class User extends ActiveRecord implements IdentityInterface
+class Userb extends ActiveRecord implements IdentityInterface
 {
 // 	// логин пользователя
  	public $id;
@@ -38,12 +38,11 @@ class User extends ActiveRecord implements IdentityInterface
 				['user_login', 'unique','message'=>'Пользователь с таким логином уже существует.']
 			];
 	}
-	
 	 public static function tableName()
     {
         return "user" ;
     }
-    
+	
 	public function getPhonemaildatas()
     {
 		//var_dump($this->hasMany(Phonemaildata::className(), ['idPerson' => 'idPerson']));die;
@@ -69,6 +68,7 @@ class User extends ActiveRecord implements IdentityInterface
     public function getId()
     {
 		//var_dump($this->idUser);die();
+		
 		$this->id = $this->user_id;
 		return $this->id;
     }
@@ -84,16 +84,6 @@ class User extends ActiveRecord implements IdentityInterface
     }
     
 
-//     public static function getId()
-//     {
-// 		return $this->id;
-//     }
-	
-	
-	
-// 	public static function findIdentityByAccessToken($token, $type = null){
-// 		return self::findOne(['acces_token' => $token]);
-// 	}
 
 
 }

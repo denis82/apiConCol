@@ -60,7 +60,14 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        return $this->render('index');
+		$res = Yii::$app->mailer->compose()
+			->setTo('dtelegin.spok@yandex.ru')
+			->setSubject('Тема сообщения')
+			->setTextBody('Текст сообщения')
+			->setHtmlBody('<b>текст сообщения в формате HTML</b><a href = "http://con-col-lp.picom.su/basic/web/site/index">ntrcn</a>')
+			->send();
+			var_dump($res); die();
+        //return $this->render('index');
     }
 
     /**

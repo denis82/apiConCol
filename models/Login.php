@@ -4,6 +4,7 @@ namespace app\models;
 
 use Yii;
 use yii\base\Model;
+use app\models\User;
 use yii\base\Security;
 use yii\base\ErrorException;
 
@@ -15,12 +16,13 @@ use yii\base\ErrorException;
  */
 class Login extends Model
 {
-    public $email;
+    public $login;
     public $password;
     public $newPassword;
     public $userIp;
     public $rememberMe = true;
-	private $token = false;
+    public $checkToken = true;
+	public $token = false;
     
     private $_user = false;
 	
@@ -32,9 +34,9 @@ class Login extends Model
 	{
 		return [
 		
-			[['email','password'], 'required'],
-			['email','email'],
-			['password', 'validatePassword'],
+			[['password'], 'required'],
+			['login','email'],
+			['password', 'valPassword'],
 		];
 	}
 
@@ -45,14 +47,30 @@ class Login extends Model
      * @param string $attribute the attribute currently being validated
      * @param array $params the additional name-value pairs given in the rule
      */
-    public function validatePassword($attribute, $params)
+//     public function validatePassword($attribute, $params)
+//     {
+// 
+//         if (!$this->hasErrors()) {
+//             $user = $this->getUser();
+//             
+//             if($user) {
+// 				if (!Yii::$app->getSecurity()->validatePassword($this->password, $user->password)){
+// 					$this->addError($attribute, 'Пароль не верный.');
+// 				}
+// 			}	
+//         }
+//     }
+    
+    public function valPassword($attribute, $params)
     {
-
         if (!$this->hasErrors()) {
-            $user = User::findOne(['email' => $this->email]);
-            if (!Yii::$app->getSecurity()->validatePassword($this->password, $user->password)){
-                $this->addError($attribute, 'Пароль не верный.');
-            }
+            $user = $this->getUser();
+            
+            if($user) {
+				if ($user->user_password != md5($this->password)){
+					$this->addError($attribute, 'Пароль не верный.');
+				}
+			}	
         }
     }
 
@@ -68,7 +86,12 @@ class Login extends Model
         }
         return false;
     }
+	 public function getUser()
+    {
+            return User::findOne(['user_login' => $this->login]);
 
+    }
+    
     /**
      * 
      *
@@ -77,67 +100,64 @@ class Login extends Model
     public function getToken()
     {
         if ($this->token === false) {
-            $userToken = User::find()
-					->where(['email' => $this->email])
-					->one();
-        
-        //$userToken->lastLoginTime
-			if ($userToken->lastLoginTime !== date('Y-m-d')) {  // если пара логин пароль верна то проверяется дата последнего логина, если дата старая токен обновляется
-				//$model->token = generateRandomString();
-				$generateToken = new Security();
-				
-				$user = User::find()
-						->where(['email' => $this->email])
-						->one();
-				if ($user) {		
-					$user->lastLoginTime = date('Y-m-d');
-					//var_dump(ip2long($this->userIp));
-					$user->lastLoginIp = ip2long($this->userIp);
-					$user->access_token = $generateToken->generateRandomString();
-				
-					try {
-						$user->save();
-						return $user->access_token;
-					} catch (ErrorException $e) {
-						
+
+			$userToken = $this->getUser();		
+			if(isset($userToken)) {
+					$generateToken = Yii::$app->security;
+					//$userToken->lastLoginTime = date('Y-m-d');
+					//$userToken->lastLoginIp = ip2long($this->userIp);
+					$userToken->access_token = $generateToken->generateRandomString();
+					if($userToken->validate()) {
+						$userToken->save();
+						return $userToken->access_token;
+					} else {
 						return false;
 					}
-				} else {
-					return false;
-				}
-			} else {
-				$user = User::find()
-						->where(['email' => $this->email])
-						->one();
-				return $user->access_token;
+
+ 			}  else {
+				return false;
 			}
         } else {
 			return false;
         }
-		//var_dump($userToken->lastLoginTime);die();
-        return $userToken->access_token;
+		//var_dump($userToken->access_token);die();
+        //return $userToken->access_token;
     }
     
     public function updatePassword()
 	{
-		$user = User::find()
-					->where(['email' => $this->email])
-					->one();
-		$user->password = Yii::$app->getSecurity()->generatePasswordHash($this->newPassword);
-		if($user->save()) {
-		return true;
+		if($this->token) {
+			$user = User::find()
+						->where(['access_token' => explode(' ',$this->token)[1]])
+						->one();
+			$user->password = Yii::$app->getSecurity()->generatePasswordHash($this->newPassword);
+			if($user->save()) {
+			return true;
+			}
+		} else  {
+			return false;
 		}
 		
 	}
 	
-	public function logout($token)
+	public function logout($token = false)
 	{
-		$user = User::find()
-					->where(['access_token' => explode(' ',$token)[1]])
-					->one();
-		$user->access_token = '';
-		if($user->save()) {
-			return true;
+		if($token) {
+			$user = User::find()
+						->where(['access_token' => explode(' ',$token)[1]])
+						->one();
+			//return $user->access_token;
+			if(isset($user->access_token)) {
+				$user->access_token = '';
+				
+				if ($user->save()) { return true;} else { return false;}
+				
+				
+				
+			} else {
+				$this->checkToken  = false;
+				return   false;
+			}
 		} else {
 			return false;
 		}

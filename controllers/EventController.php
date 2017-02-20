@@ -6,120 +6,82 @@ use Yii;
 use yii\BaseYii;
 use yii\db\Query;
 use app\models\User;
-use app\models\Signup;
 use app\models\Login;
-use app\models\EventSubscription;
+use app\models\Signup;
+use app\models\Person;
 use app\models\UserEdit; 
 use yii\rest\Controller;
+use yii\db\ActiveRecord;
+use yii\base\DynamicModel;
 use app\models\Userprofile;
 use app\models\Phonemaildata;
-use yii\db\ActiveRecord;
+use app\models\EventSubscription;
 use yii\filters\auth\HttpBearerAuth;
-/* use app\models\Cardstack;
-use app\models\CardLocation; */
-
 
 
 class EventController extends MainapiController
 {
+
+	const REGISTRATION = 'registration';
 	
-	
-	public $id = 'id';
-	public $sort = 30;
-	public $date = 'date';
-	public $name = 'name';
-	public $info = 'info';
-	public $image = 'image';
-	public $tagIds = 'tagIds';
-	public $active = 'active';
-	public $bornDate = 'bornDate';
-	public $findName = 'findName';
-	public $datas = [];
-	public $tempArray = [];
 	public $temp = [];
-	
-        
-	const IDS = 'ids';
-	const VERSION = 1;
-	const DATAS = 'datas';
-	
-	const DATEINFO = 'DateInfo';
-	const TAGKIND = 'tagKindIds';
-    
-    public function behaviors()
-    {
-	  return [
-		'authenticator' => [
-		  'class' => HttpBearerAuth::className(),
-		],
-		'access' => [
-		  'class' => AccessControllAuth::className(),
-		  'rules' => [
-			[
-			  'allow' => true,
-			  'roles' => ['adminPanel'],
-			],
-		  ],
-		],
-	  
-	  ];
-        //$behaviors = parent::behaviors();
-        //$behaviors['authenticator']['class'] = HttpBearerAuth::className();
-        //$behaviors['authenticator']['only'] = ['update'];
-        
-        //return $behaviors;
-    }
     
 	public function actionProfileregistration()
 	{
-		$request = Yii::$app->request;
-		$idArray = $request->post(self::IDS);
-		$state = $request->post('state');
-		$this->temp = $this->simpleArray($idArray);
-		if(!empty($this->temp)) {
-			if ('registration' === $state) {  // если нужно зарегистрировать пользователя
-				$idArray = [];
-				foreach($this->temp as $id) {
-					$idArray[] = [6,$id,1];
-				}
-				$resQuery = Yii::$app->db->createCommand()->batchInsert('{{%eventSubscription}}',array('idUser','idEvent','state'),$idArray)->execute();
-				if (0 == $resQuery ) {
-					$CardStack['error'] = ['Регистрация не прошла!'];
-				}
-			} 
-			if('unregistration' === $state) { // если нужно РАЗрегистрировать пользователя
-				
+		$idUser = Yii::$app->user->identity->getId();
+		if($idUser) {
+			$state = Yii::$app->request->post('state');
+			$this->temp = $this->simpleArray(Yii::$app->request->post(self::IDS));
+			if($this->temp) {  // если полученный массив ids[] валидный едем дальше
+				$events = new EventSubscription;
+				$this->tempArray = $events->status($idUser,$this->temp,$state); 
+				if(!empty($this->tempArray)) {$this->datas['success'] = true;} 
+			} else {
+				$this->datas['errors'][] = 'данные массива ids не корректные';
 			}
-		}
-		
-		$this->datas[self::DATAS] = $CardStack;
-		//$this->datas = $CardStack;
+			//$this->datas['authorized'] = true;
+		} /*else {
+			$this->datas['authorized'] = false;
+		}*/
+		$this->checkAuth();
+		$this->datas[self::DATAS] = $this->tempArray;
 		return $this->datas;
 	}
+	
+	
 	public function actionNoneprofileregistration()
     {
-		$request = Yii::$app->request;
-		$idArray = $request->post(self::IDS);
-		$state = $request->post('state');
-		$this->temp = $this->simpleArray($idArray);
-		if(!empty($this->temp)) {
-			if ('registration' === $state) {  // если нужно зарегистрировать пользователя
-				$idArray = [];
-				foreach($this->temp as $id) {
-					$idArray[] = [6,$id,1];
+		
+// 		try {
+// 			 Yii::$app->user->identity->getId();
+// 		} catch (Exception $e){
+// 			$idUser = true;
+// 		}
+		//if(!$idUser) {
+			//$state = Yii::$app->request->post('state');
+			$values = Yii::$app->request->post();
+			$this->temp = $this->simpleArray(Yii::$app->request->post(self::IDS));
+			if(!empty($this->temp)) {
+				$person = new Person();
+				$person->attributes = $values;
+				if($person->validate()) {
+					if($person->save()) {
+						$events = new EventSubscription;
+						$this->tempArray = $events->status($person->id,$this->temp,self::REGISTRATION);
+						if(!empty($this->tempArray)) {$this->datas['success'] = true;} 
+					}
 				}
-				$resQuery = Yii::$app->db->createCommand()->batchInsert('{{%eventSubscription}}',array('idUser','idEvent','state'),$idArray)->execute();
-				if (0 == $resQuery ) {
-					$CardStack['error'] = ['Регистрация не прошла!'];
-				}
-			} 
-			if('unregistration' === $state) { // если нужно РАЗрегистрировать пользователя
 				
 			}
-		}
-		
-		$this->datas[self::DATAS] = $CardStack;
-		//$this->datas = $CardStack;
+			//$this->datas['authorized'] = false;
+// 		} else {
+// 			$this->datas[self::DATAS] = [];
+// 			$this->datas['success'] = false;
+// 			//$this->datas['authorized'] = true;
+// 		}
+		$this->checkAuth();
+		$this->datas[self::DATAS] = $this->tempArray;
+
 		return $this->datas; 
 	}
 }

@@ -6,9 +6,13 @@ $config = [
     'id' => 'basic',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
-    'language' => 'ru-RU',
-    'sourceLanguage' => 'en-US',
+    'language' => 'ru',
+//     'sourceLanguage' => 'en-US',
     'components' => [
+		'response' => [                 
+			'format' => yii\web\Response::FORMAT_JSON, 
+							'charset' => 'UTF-8',               
+			],
         'request' => [
             'parsers' => [
                     'application/json' => 'yii\web\JsonParser',
@@ -57,7 +61,9 @@ $config = [
                         
                     ],
                 ],*/
-                
+                'list' => 'list/listindex',
+                'catalog' => 'catalog/catalogindex',
+                'data' => 'data/dataindex',
                 '<controller>' => '<controller>/index',
                 '<controller>/<category>/<action><suffix:[/]{0,1}>' => '<controller>/<category><action>',
                 //'<controller>/<category>/<action>' =>'<controller>/<action>',
@@ -90,7 +96,25 @@ $config = [
                 ],
             ],
        ],
+       'mailer' => [
+            'class' => 'yii\swiftmailer\Mailer',
+            'transport' => [
+            //'class' => 'Swift_SmtpTransport',
+            //'host' => 'localhost',
+            //'username' => 'picomsu',
+            //'password' => 'NyAIh9kH',
+            //'port' => '587',
+            //'encryption' => 'tls',
+        ],
+       ],
+       
+       
         
+    ],
+    'modules' => [
+        'admin' => [
+            'class' => 'app\modules\admin\Module',
+        ],
     ],
     'params' => $params,
     

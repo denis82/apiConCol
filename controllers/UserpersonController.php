@@ -48,7 +48,7 @@ class UserpersonController extends MainapiController
 		$tempArray = [];
 		$temp = $this->simpleArray($idArray); 
 		if (!empty($temp)) {
-			$userInfo = Userprofile::findAll($temp);
+			$userInfo = User::findAll($temp);
 			foreach($userInfo as $res){
 				$tempArray['foo'] = $res->phonemaildatas;
 				$tempArray['id'] = $res->idPerson;
