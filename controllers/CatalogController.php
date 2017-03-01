@@ -19,7 +19,6 @@ class CatalogController extends MainapiController
 		$infotype = Yii::$app->request->post(self::INFOTYPE);
 		$action = Yii::$app->request->post(self::ACTION);
 		$ids = $this->simpleArray(Yii::$app->request->post(self::IDS));
-			
 		if(!in_array($action,['person','event','company','my'])) {
 		
 			$list = new Person;

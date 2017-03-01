@@ -18,8 +18,8 @@ class Catalog extends CommonLDC
 		if($listPerson) {
 			$list = [];
 			foreach($listPerson->companys as $key => $per) {
-				$list['id'] = $per['id'];
-				$list['name'] = $per['name'];
+				$list['id'] = $per['company_id'];
+				$list['name'] = $per['company_name'];
 				$list['info'] = '';
 				$list['image'] = '';
 				$list['date'] = 0;
@@ -33,39 +33,57 @@ class Catalog extends CommonLDC
     }
     public function PersonEvent($ids)
     {
-		$listPerson = Person::find()->where(['id' => $ids])->with('eventSubscriptions.events')->one();
+    
+		$listPerson = Person::findOne($ids); 
 		if($listPerson) {
 			$list = [];
-			foreach($listPerson->eventSubscriptions as $per) {
-				$tempArray = [];
-				$tempArray['id'] = $per['idEvent'];
-				if($per->events) {
-					foreach($per->events as $key => $res) {
-						if('image' == $key) {
-							$tempArray['image'] = $res['image'];
-							$tempArray['info'] = $res['info'];
-							$tempArray['name'] = $res['name'];
-						}
-					}
-				} else {
-					$tempArray['image'] = '';
-					$tempArray['info'] = '';
-					$tempArray['name'] = $res['name'];
-				}
- 				$tempArray['date'] = strtotime($per['date']);
+			foreach($listPerson->events as $key => $per) {
+				$tempArray['id'] = $per['event_id'];
+				$tempArray['name'] = $per['event_name'];
+				$tempArray['info'] = $per['event_anons'];
+				$tempArray['image'] = $per['event_image'];
+				$tempArray['date'] = strtotime($per['event_date']);
 				$tempArray['hint'] = '';
 				$tempArray['kind'] = '';
 				$list[] = $tempArray;
- 			}
+			}
 			return $list;
 		} else {
 			return $list = [];
 		}
+// 		$listPerson = Person::find()->where(['id' => 162])->with('eventSubscriptions.events')->one();
+// 		if($listPerson) {
+// 			$list = [];
+// 			foreach($listPerson->eventSubscriptions as $per) {
+// 				$tempArray = [];
+// 				$tempArray['id'] = $per['idEvent'];
+// 				if($per->events) {
+// 					foreach($per->events as $key => $res) {
+// 						if('image' == $key) {
+// 							$tempArray['image'] = $res['image'];
+// 							$tempArray['info'] = $res['info'];
+// 							$tempArray['name'] = $res['name'];
+// 						}
+// 					}
+// 				} else {
+// 					$tempArray['image'] = '';
+// 					$tempArray['info'] = '';
+// 					$tempArray['name'] = $res['name'];
+// 				}
+//  				$tempArray['date'] = strtotime($per['date']);
+// 				$tempArray['hint'] = '';
+// 				$tempArray['kind'] = '';
+// 				$list[] = $tempArray;
+//  			}
+// 			return $list;
+// 		} else {
+// 			return $list = [];
+// 		}
     }
     
     public function EventPerson($ids)
     {
-		$listPerson = Event::find()->where(['id' => $ids])->with('eventSubscriptions.persons')->one();
+		$listPerson = Event::find()->where(['event_id' => $ids])->with('eventSubscriptions.persons')->one();
 		if($listPerson) {
 			$list = [];
 			foreach($listPerson->eventSubscriptions as $per) {
@@ -130,7 +148,7 @@ class Catalog extends CommonLDC
     
     public function EventExpert($ids)
     {
-		$listExpert = Event::find()->where(['id' => $ids])->with('experts.persons')->one();
+		$listExpert = Event::find()->where(['event_id' => $ids])->with('experts.persons')->one();
 		if($listExpert) {
 			$list = [];
 			foreach($listExpert->experts as $per) {
@@ -156,13 +174,13 @@ class Catalog extends CommonLDC
 			}
 			return  $list ;
 		} else {
-			return $list = [1];
+			return $list = [];
 		}
     }
     
     public function CompanyPerson($ids)
     {
-		$listPerson = Company::find()->where(['id' => $ids])->with('companyPersons.persons')->one();
+		$listPerson = Company::find()->where(['company_id' => $ids])->with('companyPersons.persons')->one();
 		if($listPerson) {
 			$list = [];
 			foreach($listPerson->companyPersons as $per) {
@@ -190,6 +208,7 @@ class Catalog extends CommonLDC
 		} else {
 			return $list = [];
 		}
+		//return $ids ;
     }
     
     public function MyCompany($ids)
@@ -199,10 +218,10 @@ class Catalog extends CommonLDC
 			$list = [];
 			foreach($listCompany->companys as $per) {
 				$tempArray = [];
-				$tempArray['id'] = $per['id'];
-				$tempArray['image'] = $per['logo'];
+				$tempArray['id'] = $per['company_id'];
+				$tempArray['image'] = $per['company_logo'];
 				$tempArray['info'] = '';
-				$tempArray['name'] = $per['name'];
+				$tempArray['name'] = $per['company_name'];
 				$tempArray['date'] = 0;
 				$tempArray['hint'] = '';
 				$tempArray['kind'] = '';

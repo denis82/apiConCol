@@ -7,6 +7,9 @@ $config = [
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
     'language' => 'ru',
+    'aliases' => [
+        '@imgHost' => 'http://con-col.picom.su',
+    ],
 //     'sourceLanguage' => 'en-US',
     'components' => [
 		'response' => [                 
@@ -66,6 +69,7 @@ $config = [
                 'data' => 'data/dataindex',
                 '<controller>' => '<controller>/index',
                 '<controller>/<category>/<action><suffix:[/]{0,1}>' => '<controller>/<category><action>',
+                '<controller>/<category1>/<category2>/<action><suffix:[/]{0,1}>' => '<controller>/<category1><category2><action>',
                 //'<controller>/<category>/<action>' =>'<controller>/<action>',
 // 		'api/profile/registration' =>'api/registration',
 // 		'api/profile/updatepassword' =>'api/updatepassword',

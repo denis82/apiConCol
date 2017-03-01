@@ -163,7 +163,7 @@ class ProfileController extends MainapiController
 		}
 		$this->datas["errors"] = $loginModel->errors;
 
-		$this->datas[self::DATAS] = $this->tempArray;
+		$this->datas[self::DATAS] = [];//$this->tempArray;
 		return $this->datas;
 	}
 	
@@ -278,29 +278,27 @@ class ProfileController extends MainapiController
 	public function actionUpdate()
 	{
 		$model = new UploadForm();
-		$model->file = UploadedFile::getInstanceByName('imagefile');
-		$path = false;
+		$model->file = UploadedFile::getInstanceByName('imagefile');  // imagefile - получено из поста
 		$newImgName = '';
-		if($model->file) {
-			if ($model->file && $model->validate()) {
-				$newImgName = Yii::$app->security->generateRandomString ( $length = 25 ) . '.' . $model->file->extension;
-				$model->file->saveAs(Yii::getAlias('@app/web/uploads/userAvatars/bigSize/') . '/' . $newImgName);
-				$image = new Image();
-				$image->load(Yii::getAlias('@app/web/uploads/userAvatars/bigSize/') . '/' . $newImgName);   //Загружаем фото (картинку)
-				$image->resize(256,256);     //Изменяем размер со сглаживанием.
-				switch ($model->file->extension) {
-					case 'jpg':
-						$ext = IMAGETYPE_JPEG;
-						break;
-					case 'gif':
-						$ext = IMAGETYPE_GIF;
-						break;
-					case 'png':
-						$ext = IMAGETYPE_PNG;
-						break;
-				}	
-				$image->save(Yii::getAlias('@app/web/uploads/userAvatars/smallSize/') . '/' . $newImgName ,$ext);
-			}
+		
+		if ($model->file && $model->validate()) {
+			$newImgName = Yii::$app->security->generateRandomString ( $length = 25 ) . '.' . $model->file->extension;
+			$model->file->saveAs(Yii::getAlias('@app/web/uploads/userAvatars/bigSize/') . '/' . $newImgName);
+			$image = new Image();
+			$image->load(Yii::getAlias('@app/web/uploads/userAvatars/bigSize/') . '/' . $newImgName);   //Загружаем фото (картинку)
+			$image->resize(256,256);     //Изменяем размер со сглаживанием.
+			switch ($model->file->extension) {
+				case 'jpg':
+					$ext = IMAGETYPE_JPEG;
+					break;
+				case 'gif':
+					$ext = IMAGETYPE_GIF;
+					break;
+				case 'png':
+					$ext = IMAGETYPE_PNG;
+					break;
+			}	
+			$image->save(Yii::getAlias('@app/web/uploads/userAvatars/smallSize/') . '/' . $newImgName ,$ext);
 		}
 		$this->tempArray = Yii::$app->request->post('fields');
 		$personPost = Yii::$app->request->post();
@@ -564,10 +562,66 @@ class ProfileController extends MainapiController
 			}
 			$this->tempArray['scope'] = $scope;
 		}
+		if(!empty($this->tempArray)) {
+				$this->datas['success'] = true;
+		}
 		$this->datas[self::DATAS] = $this->tempArray;
 		return $this->datas;
 	}
 	
+	
+	public function actionUpdatecompany()
+	{
+// 		$fieldsArray = Yii::$app->request->post('id');
+// 		$idUser = Yii::$app->user->identity->getId();
+// 		
+// 		$model = new UploadForm();
+// 		
+// 		//$this->datas['nameClass'] = Yii::$app->controller->action->id;
+// 		$model->file = UploadedFile::getInstanceByName('imageFile');
+// 		$model->upload();
+// 		//$this->datas['nameClass'] = $model->file;
+// 		$this->uploadImage()
+// 		$newImgName = '';
+// 		if($model->file) {
+// 			if ($model->file && $model->validate()) {
+// 				$newImgName = Yii::$app->security->generateRandomString ( $length = 25 ) . '.' . $model->file->extension;
+// 				$model->file->saveAs(Yii::getAlias('@app/web/uploads/companyAvatars/bigSize/') . '/' . $newImgName);
+// 				$image = new Image();
+// 				$image->load(Yii::getAlias('@app/web/uploads/companyAvatars/bigSize/') . '/' . $newImgName);   //Загружаем фото (картинку)
+// 				$image->resize(256,256);     //Изменяем размер со сглаживанием.
+// 				switch ($model->file->extension) {
+// 					case 'jpg':
+// 						$ext = IMAGETYPE_JPEG;
+// 						break;
+// 					case 'gif':
+// 						$ext = IMAGETYPE_GIF;
+// 						break;
+// 					case 'png':
+// 						$ext = IMAGETYPE_PNG;
+// 						break;
+// 				}	
+// 				$image->save(Yii::getAlias('@app/web/uploads/companyAvatars/smallSize/') . '/' . $newImgName ,$ext);
+// 			}
+// 		}
+		
+		
+// 		$modelPerson = Person::findOne($idUser);
+// 		$companyPerson = $modelPerson->companys;
+// 		if($companyPerson) {
+// 			$this->tempArray = $this->person($idUser,$exeptionFields);
+// 			$scope = [];
+// 			foreach($modelPerson->companys as $company) {
+// 				$scope[] = $company['company_name']; 
+// 			}
+// 			$this->tempArray['scope'] = $scope;
+// 		}
+		if(!empty($this->tempArray)) {
+				$this->datas['success'] = true;
+		}
+		$this->datas[self::DATAS] = $this->tempArray;
+		return $this->datas;
+	}
 	
 	/*  Возвращяет подробный список сведений о персоне
 	/	вход: 	$userInfo - [Integer] - id персоны

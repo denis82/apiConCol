@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use Yii;
 use app\models\User;
+use app\models\Data;
 use app\models\Event;
 use app\models\Person;
 use app\models\Listing;
@@ -20,32 +21,32 @@ class DataController extends MainapiController
 		$infotype = Yii::$app->request->post(self::INFOTYPE);
 		$ids = $this->simpleArray(Yii::$app->request->post(self::IDS));
 		if($ids or $infotype == 'my') {
-			$list = new Person;
+			$modelData = new Data;
 			switch($infotype){
 				case 'expert':
-					$this->tempArray = $list->dataLP($ids);  // список экспертов dataListExpert
+					$this->tempArray = $modelData->dataListExpert($ids,$infotype);  // список экспертов dataListExpert
 					break;
 				case 'event':
-					$this->tempArray = $list->dataLE($ids); // список событий  dataListEvent
+					$this->tempArray = $modelData->dataListEvent($ids,$infotype); // список событий  dataListEvent
 					break;
 				case 'company':
-					$this->tempArray = $list->dataLC($ids); // список компаний  dataListCompany
+					$this->tempArray = $modelData->dataListCompany($ids,$infotype); // список компаний  dataListCompany
 					break;
 				case 'about':
-					$this->tempArray = $list->dataLA(); // Страница о программе  dataListAbout
+					$this->tempArray = $modelData->dataListAbout(); // Страница о программе  dataListAbout
 					break;
 				case 'resource':
-					$this->tempArray = $list->dataLR($ids); // список ресурсов(презентации к мероприятию)  dataListResourse
+					$this->tempArray = $modelData->dataListResource($ids,$infotype); // список ресурсов(презентации к мероприятию)  dataListResourse
 					break;
 				case 'person':
-					$this->tempArray = $list->dataLP($ids); // список персон  dataListPerson
+					$this->tempArray = $modelData->dataListPerson($ids,$infotype); // список персон  dataListPerson
 					break;
 				case 'my':
 					$ids = [];
 					if(!$idUser = Yii::$app->user->isGuest){
 						$ids[] = Yii::$app->user->identity->getId();
 					} 
-					$this->tempArray = $list->dataLP($ids); // мой список   dataListMy
+					$this->tempArray = $modelData->dataListPerson($ids,$infotype); // мой список   dataListMy
 					break;
 				default:
 					break;	

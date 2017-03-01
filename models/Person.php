@@ -11,19 +11,6 @@ class Person extends ActiveRecord
 	const ACCESS_PUBLIC = 2;
 	const EVENT_IBLOCK = 9;
 	
-	public $personSettings = [
-				'prefConfShowMyPerson'=>'int',
-				'prefConfShowMyPhoto'=>'int',
-				'prefConfShowMyCompany'=>'int',
-				'prefConfShowMyContacts'=>'int',
-				'prefEnablePush'=>'boolean',
-				'prefEnablePushNews'=>'boolean',
-				'prefEnablePushEventPost'=>'boolean',
-				'prefEnablePushEventAlbum'=>'boolean',
-				'prefEnablePushPhotoWithMe'=>'boolean',
-				'prefEnablePushEventAlarm'=>'boolean',
-				'prefEnablePushNewEvent'=>'boolean'
-			];
 	public function getPhonemaildatas()
     {
 		//var_dump($this->hasMany(Phonemaildata::className(), ['idPerson' => 'idPerson']));die;
@@ -37,8 +24,14 @@ class Person extends ActiveRecord
     
     public function getEvents()
     {
-           return $this->hasMany(Event::className(), ['id' => 'idEvent'])
+           return $this->hasMany(Event::className(), ['event_id' => 'idEvent'])
 				->viaTable('a_eventSubscription', ['idUser' => 'id']);
+    }
+    
+    public function getExperts()
+    {
+           return $this->hasMany(Event::className(), ['event_id' => 'idEvent'])
+				->viaTable('a_expert', ['idPerson' => 'id']);
     }
 	
 	public function getCompanys()
@@ -138,9 +131,9 @@ class Person extends ActiveRecord
 			foreach($listObj as $per) {
 				$tempArray = [];
 				$tempArray['id'] = $per['idPerson'];
-				$tempArray['image'] = $per->persons[0]['photo'];
-				$tempArray['info'] = $per->persons[0]['descr'];
-				$tempArray['name'] = $per->persons[0]['name'];
+				$tempArray['image'] = (count($per->persons))?$per->persons[0]['photo']:'';
+				$tempArray['info'] = (count($per->persons))?$per->persons[0]['descr']:'';
+				$tempArray['name'] = (count($per->persons))?$per->persons[0]['name']:'';
  				$tempArray['date'] = 0;
 				$tempArray['hint'] = '';
 				$tempArray['kind'] = '';
@@ -181,16 +174,16 @@ class Person extends ActiveRecord
 // 			return $list = [];
 // 		}
 //============================================================================
- 		$listObj = Event::find()->all();
+ 		$listObj = Event::find()->orderBy(['event_date' => SORT_DESC])->all();
 		if($listObj) {
 			$list = [];
 			foreach($listObj as $per) {
 				$tempArray = [];
-				$tempArray['id'] = $per['id'];
-				$tempArray['image'] = $per['image'];
-				$tempArray['name'] = $per['name'];
-				$tempArray['info'] = $per['info'];
- 				$tempArray['date'] = strtotime($per['date']);
+				$tempArray['id'] = $per['event_id'];
+				$tempArray['image'] = $per['event_image'];
+				$tempArray['name'] = $per['event_name'];
+				$tempArray['info'] = $per['event_anons'];
+ 				$tempArray['date'] = strtotime($per['event_date']);
 				$tempArray['hint'] = '';
 				$tempArray['kind'] = '';
 				$list[] = $tempArray;
@@ -214,9 +207,9 @@ class Person extends ActiveRecord
 			$list = [];
 			foreach($listObj as $per) {
 				$tempArray = [];
-				$tempArray['id'] = $per['id'];
-				$tempArray['image'] = $per['logo'];
-				$tempArray['info'] = $per['info'];
+				$tempArray['id'] = $per['company_id'];
+				$tempArray['image'] = $per['company_logo'];
+				$tempArray['info'] = $per['company_anons'];
  				$tempArray['date'] = 0;
 				$tempArray['hint'] = '';
 				$tempArray['kind'] = '';
@@ -272,10 +265,7 @@ class Person extends ActiveRecord
 		}
 	}
 	
-	public function dataLA()
-	{
 	
-	}
 	public function dataLR()
 	{
 	
