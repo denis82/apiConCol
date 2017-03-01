@@ -3,17 +3,26 @@
 namespace app\controllers;
 
 use Yii;
-// use app\models\User;
-// use app\models\Event;
-// use app\models\Person;
-// use app\models\Listing;
-// use app\models\Company;
 use app\models\Label;
 use app\models\Groupgallery;
 use yii\base\DynamicModel;
 
 class AlbumController extends MainapiController
 {
+	/*
+	*	Возвращает информацию  о текущем альбоме 
+	/	вход: 	id - [Integer] идентификатор альбома
+	/	выход:  array [
+	/				event_id - [Integer] [optional]  Идентификатор текущего эвента
+	/				images - [Array] Картинки текущего альбома
+	/				id - [Integer] идентификатор
+	/				image - [String] картинка 
+	/				sub_events_albums - [Object] [optional]
+	/				id - [Integer] идентификатор альбома
+	/				image - [String] картинка альбома.
+	/				]
+	*/			
+	
 	public function actionIndex()
     {
 		
@@ -31,7 +40,6 @@ class AlbumController extends MainapiController
 					$this->tempArray['images'][] = $tempArray;
 				}
 				$this->tempArray['sub_events_albums'] = [];
-				
 			}
  		}
 		if(!empty($this->tempArray)) {$this->datas['success'] = true;}
@@ -39,6 +47,22 @@ class AlbumController extends MainapiController
 		$this->datas[self::DATAS] = $this->tempArray;
 		return $this->datas;
 	}
+	
+	/*
+	*	Возвращает информацию о метках указанной фотографии 
+	/	вход: 	id - [Integer] идентификатор альбома
+	/	выход:  array [
+	/				id - [Integer]  Идентификатор метки
+	/				left - [Float from 0.0 to 1.0] координаты прямоугольника в процентном соотношении от размера фотографии (левый край)
+	/				right - [Float from 0.0 to 1.0] координаты прямоугольника в процентном соотношении от размера фотографии (правый край)
+	/				top - [Float from 0.0 to 1.0] координаты прямоугольника в процентном соотношении от размера фотографии (верхний край)
+	/				bottom - [Float from 0.0 to 1.0] координаты прямоугольника в процентном соотношении от размера фотографии (нижний край)
+	/				person - [Integer] - Идентификатор персоны на которую указывает метка (0 - если это я, -1 - если метка не указывает персону)
+	/				name - [String] Имя и фамилия персоны или Я
+	/				info - [String] текст метки для отображения (указанный текст при создании)
+	/				]
+	*/
+	
 	public function actionLabels()
     {
 		$idImage = Yii::$app->request->post('id');
@@ -63,6 +87,20 @@ class AlbumController extends MainapiController
 		$this->datas[self::DATAS] = $this->tempArray;
 		return $this->datas;
     }
+    
+    /*
+	*	Помечает пользователя на фотографии
+	/	вход: 	id - [Integer] идентификатор фотографии
+	/			info - [String] текст метки
+	/			left - [Float from 0.0 to 1.0] координаты прямоугольника в процентном соотношении от размера фотографии (левый край)
+	/			right - [Float from 0.0 to 1.0] координаты прямоугольника в процентном соотношении от размера фотографии (правый край)
+	/			top - [Float from 0.0 to 1.0] координаты прямоугольника в процентном соотношении от размера фотографии (верхний край)
+	/			bottom - [Float from 0.0 to 1.0] координаты прямоугольника в процентном с
+	/	выход:  array [
+	/				id - [Integer]  идентификатор созданной метки
+	/				]
+	*/
+    
     public function actionLabelme()
     {
 		$dataLabel = Yii::$app->request->post();
@@ -77,13 +115,26 @@ class AlbumController extends MainapiController
 		} else {
 			$this->datas['errors'] = $modelLabel->errors;
 		} 
- 		//$modelLabel = Label::findAll(['gallery_id' => $idImage]);
  		if(!empty($this->tempArray)) {$this->datas['success'] = true;}
  		
 		$this->checkAuth();
 		$this->datas[self::DATAS] = $this->tempArray;
 		return $this->datas;
     }
+    
+    /*
+	*	Помечает пользователя на фотографии
+	/	вход: 	id - [Integer] идентификатор фотографии
+	/			person - [Integer] идентификатор персоны
+	/			info - [String] текст метки
+	/			left - [Float from 0.0 to 1.0] координаты прямоугольника в процентном соотношении от размера фотографии (левый край)
+	/			right - [Float from 0.0 to 1.0] координаты прямоугольника в процентном соотношении от размера фотографии (правый край)
+	/			top - [Float from 0.0 to 1.0] координаты прямоугольника в процентном соотношении от размера фотографии (верхний край)
+	/			bottom - [Float from 0.0 to 1.0] координаты прямоугольника в процентном соотношении от размера фотографии (нижний край)
+	/	выход:  array [
+	/				id - [Integer]  идентификатор созданной метки
+	/				]
+	*/
     
     public function actionLabelperson()
     {
@@ -105,6 +156,19 @@ class AlbumController extends MainapiController
 		return $this->datas;
     }
     
+    /*
+	*	Делает текстовую метку на фотографии
+	/	вход: 	id - [Integer] идентификатор фотографии
+	/			info - [String] текст метки
+	/			left - [Float from 0.0 to 1.0] координаты прямоугольника в процентном соотношении от размера фотографии (левый край)
+	/			right - [Float from 0.0 to 1.0] координаты прямоугольника в процентном соотношении от размера фотографии (правый край)
+	/			top - [Float from 0.0 to 1.0] координаты прямоугольника в процентном соотношении от размера фотографии (верхний край)
+	/			bottom - [Float from 0.0 to 1.0] координаты прямоугольника в процентном соотношении от размера фотографии (нижний край)
+	/	выход:  array [
+	/				id - [Integer]  идентификатор созданной метки
+	/				]
+	*/
+    
     public function actionLabelunknown()
     {
 		$dataLabel = Yii::$app->request->post();
@@ -119,11 +183,17 @@ class AlbumController extends MainapiController
 			$this->datas['errors'] = $modelLabel->errors;
 		} 
  		if(!empty($this->tempArray)) {$this->datas['success'] = true;}
- 		
 		$this->checkAuth();
 		$this->datas[self::DATAS] = $this->tempArray;
 		return $this->datas;
     }
+    
+    /*
+	/	Удаляет метку с фотографии
+	/	вход: 	id - [Integer] идентификатор фотографии
+	/			labelIds - [Array[Integer]] идентификаторы удаляемых меток
+	/	выход:  array []
+	*/
     
     public function actionLabelremove()
     {
@@ -146,6 +216,12 @@ class AlbumController extends MainapiController
 		$this->datas[self::DATAS] = $this->tempArray;
 		return $this->datas;
     }
+    
+    /*
+	*	Удаляет все метки пользователя с фотографии (метки, указывающие этого пользователя)
+	/	вход: 	id - [Integer] идентификатор фотографии
+	/	выход:  array []
+	*/
     
     public function actionLabelmeremove()
     {
