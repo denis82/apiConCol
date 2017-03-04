@@ -14,7 +14,7 @@ use \GD;
 
 class TestController extends MainapiController
 {
-    fgdfgd
+    // yfgbcfk bcghfdktybz
 	const BANSTATUS = 3;
     
     public function actionUpdatedatagroup ()
