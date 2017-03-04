@@ -7,10 +7,39 @@ use app\models\Phonemaildata;
 use app\models\TrustedUsers;
 use yii\base\Model;
 
-class Catalog extends CommonLDC
+class Find extends CommonLDC
 {
 	const NOTRUST = 0; 
  
+ 
+	public function findLP() {
+		$listObj = Expert::find()->groupBy('idPerson')->all();
+		if($listObj) {
+			$list = [];
+			foreach($listObj as $per) {
+				$tempArray = [];
+				$tempArray['id'] = $per['idPerson'];
+				$tempArray['image'] = (count($per->persons))?$per->persons[0]['photo']:'';
+				$tempArray['info'] = (count($per->persons))?$per->persons[0]['descr']:'';
+				$tempArray['name'] = (count($per->persons))?$per->persons[0]['name']:'';
+ 				$tempArray['date'] = 0;
+				$tempArray['hint'] = '';
+				$tempArray['kind'] = '';
+				$list[] = $tempArray;
+			}
+			return $list;
+		} else {
+			return $list = [];
+		}
+	}
+	
+	public function findLE() {
+	
+	}
+	
+	public function findLC() {
+	
+	}
 	public function PersonCompany($ids)
     {
 		

@@ -4,28 +4,31 @@ namespace app\controllers;
 
 use Yii;
 use yii\BaseYii;
-use yii\helpers\Url;
 use yii\db\Query;
 use \Reflection;
-use \ReflectionProperty;
 use yii\web\Cookie;
+use yii\helpers\Url;
 use app\models\User;
 use app\models\Userb;
 use yii\helpers\Html;
 use app\models\Login;
+
 use yii\base\Security;
 use app\models\Person;
+use app\myclass\Image;
+use app\models\Company;
 use app\models\UserEdit;
 use yii\rest\Controller;
 use yii\db\ActiveRecord;
+use \ReflectionProperty;
+use yii\web\UploadedFile;
 use app\models\ThemeAlbum;
 use app\models\UploadForm;
-use yii\helpers\ArrayHelper;
-use app\myclass\Image;
-use yii\web\UploadedFile;
 use app\models\UploadFile;
 use app\models\Userprofile;
+use yii\helpers\ArrayHelper;
 use app\models\Registration;
+use app\models\CompanyPerson;
 use app\models\Phonemaildata;
 use app\models\Updatepassword;
 use app\models\EventSubscription;
@@ -44,17 +47,19 @@ class ProfileController extends MainapiController
 	public $stateDefault = 400;
 	public $bornDate = 'bornDate';
 	public $findName = 'findName';
-	public $idUser = '';
 	       
 	const VERSION = 1;
 	const EVENTREGIST = 1;
+	const GROUP = 'group';
 	const EVENTUNREGIST = 2;
+	const FIELDS = 'fields';
 	const DATEINFO = 'DateInfo';
 	const THEMEALBUMEVENT= 'Event';
 	const USERPERSON = 'userPerson';
 	const THEMEALBUMPERSON = 'Person';
-	const FIELDS = 'fields';
-	const GROUP = 'group';
+	
+	
+	
 	
 	
 	//public function beforeAction($action) {
@@ -69,6 +74,7 @@ class ProfileController extends MainapiController
 	/	вход: пароль, логин
 	/	выход: success/error
 	*/
+	
 	
 	public function actionRegistration()
     {
@@ -119,7 +125,6 @@ class ProfileController extends MainapiController
 		{
 			$this->datas['success'] = $UpdatepasswordModel->updatePassword();
 		} else {
-			$this->datas['success'] = false;
 			$this->datas['errors'] = $UpdatepasswordModel->errors;
 		}
 		$this->checkAuth();
@@ -277,75 +282,47 @@ class ProfileController extends MainapiController
 	
 	public function actionUpdate()
 	{
-		$model = new UploadForm();
-		$model->file = UploadedFile::getInstanceByName('imagefile');  // imagefile - получено из поста
-		$newImgName = '';
 		
-		if ($model->file && $model->validate()) {
-			$newImgName = Yii::$app->security->generateRandomString ( $length = 25 ) . '.' . $model->file->extension;
-			$model->file->saveAs(Yii::getAlias('@app/web/uploads/userAvatars/bigSize/') . '/' . $newImgName);
-			$image = new Image();
-			$image->load(Yii::getAlias('@app/web/uploads/userAvatars/bigSize/') . '/' . $newImgName);   //Загружаем фото (картинку)
-			$image->resize(256,256);     //Изменяем размер со сглаживанием.
-			switch ($model->file->extension) {
-				case 'jpg':
-					$ext = IMAGETYPE_JPEG;
-					break;
-				case 'gif':
-					$ext = IMAGETYPE_GIF;
-					break;
-				case 'png':
-					$ext = IMAGETYPE_PNG;
-					break;
-			}	
-			$image->save(Yii::getAlias('@app/web/uploads/userAvatars/smallSize/') . '/' . $newImgName ,$ext);
-		}
 		$this->tempArray = Yii::$app->request->post('fields');
-		$personPost = Yii::$app->request->post();
 		$idUser = Yii::$app->user->identity->getId();
-		if($idUser) {
-			$userInfo = Person::findOne($idUser);
-			$userInfo->attributes = $personPost;
-			if($newImgName) {
-				$userInfo->photo = $newImgName;
+
+		$userInfo = Person::findOne($idUser);
+		$userInfo->attributes = Yii::$app->request->post();
+		$model = new UploadForm();
+		$newImgName = $model->uploadImg(Yii::$app->params['pathToFolderPersonInWebSite'],$userInfo->photo);
+		if($newImgName) {
+			$userInfo->photo = $newImgName;
+		}
+		
+		if($userInfo->validate()) {
+			if($userInfo->save()){
+				$this->datas['success'] = true;
 			}
-			if($userInfo->validate()) {
-				if($userInfo->save()){
+		} else {
+			$this->datas["errors"] = $userInfo->errors;
+		}
+		$phoneMail = Phonemaildata::deleteAll(['idPerson' => $idUser]);
+		if(!empty($this->tempArray)) {
+			$fieldsArray = $this->tempArray;
+		} else {
+			$fieldsArray = [];
+		}
+		foreach($fieldsArray as $fields) {
+			$phoneMail = new Phonemaildata;
+			$phoneMail->attributes = $fields;
+			$phoneMail->idPerson = $idUser;
+			
+			if($phoneMail->validate()) {
+				if($phoneMail->save()) {
 					$this->datas['success'] = true;
 				} else {
 					$this->datas['success'] = false;
-					$this->datas["errors"][] = 'person is not save';
+					$this->datas["errors"][] = 'Phonemaildata is not save';
 				}
+				
 			} else {
 				$this->datas["errors"] = $userInfo->errors;
-			}
-			$phoneMail = Phonemaildata::deleteAll(['idPerson' => $idUser]);
-			if(!empty($this->tempArray)) {
-				$fieldsArray = $this->tempArray;
-			} else {
-				$fieldsArray = [];
-			}
-			foreach($fieldsArray as $fields) {
-				$phoneMail = new Phonemaildata;
-				$phoneMail->attributes = $fields;
-				$phoneMail->idPerson = $idUser;
-				
-				if($phoneMail->validate()) {
-					if($phoneMail->save()) {
-						$this->datas['success'] = true;
-					} else {
-						$this->datas['success'] = false;
-						$this->datas["errors"][] = 'Phonemaildata is not save';
-					}
-					$this->datas["errors"][] = 'person is not save';
-					
-				} else {
-					$this->datas["errors"] = $userInfo->errors;
-				}	
-			}
-			//$this->datas["authorized"] = true;
-		} else {
-			//$this->datas["authorized"] = false;
+			}	
 		}
 		$this->checkAuth();
 		$this->datas[self::DATAS][] = $this->person($idUser);
@@ -389,10 +366,8 @@ class ProfileController extends MainapiController
 			}
 			$this->tempArray['image'] = $arrayImg;
 			$this->tempArray['id'] = 0;
-			//$this->datas["authorized"] = true;
 			$this->datas["success"] = true;
 		} else {
-			//$this->datas["authorized"] = false;
 			$this->datas["success"] = false;
 		}
 		$this->checkAuth();
@@ -572,51 +547,63 @@ class ProfileController extends MainapiController
 	
 	public function actionUpdatecompany()
 	{
-// 		$fieldsArray = Yii::$app->request->post('id');
-// 		$idUser = Yii::$app->user->identity->getId();
-// 		
-// 		$model = new UploadForm();
-// 		
-// 		//$this->datas['nameClass'] = Yii::$app->controller->action->id;
-// 		$model->file = UploadedFile::getInstanceByName('imageFile');
-// 		$model->upload();
-// 		//$this->datas['nameClass'] = $model->file;
-// 		$this->uploadImage()
-// 		$newImgName = '';
-// 		if($model->file) {
-// 			if ($model->file && $model->validate()) {
-// 				$newImgName = Yii::$app->security->generateRandomString ( $length = 25 ) . '.' . $model->file->extension;
-// 				$model->file->saveAs(Yii::getAlias('@app/web/uploads/companyAvatars/bigSize/') . '/' . $newImgName);
-// 				$image = new Image();
-// 				$image->load(Yii::getAlias('@app/web/uploads/companyAvatars/bigSize/') . '/' . $newImgName);   //Загружаем фото (картинку)
-// 				$image->resize(256,256);     //Изменяем размер со сглаживанием.
-// 				switch ($model->file->extension) {
-// 					case 'jpg':
-// 						$ext = IMAGETYPE_JPEG;
-// 						break;
-// 					case 'gif':
-// 						$ext = IMAGETYPE_GIF;
-// 						break;
-// 					case 'png':
-// 						$ext = IMAGETYPE_PNG;
-// 						break;
-// 				}	
-// 				$image->save(Yii::getAlias('@app/web/uploads/companyAvatars/smallSize/') . '/' . $newImgName ,$ext);
-// 			}
-// 		}
+ 		$idCompany = Yii::$app->request->post('id');
+ 		$this->tempArray = Yii::$app->request->post('fields');
+		$idUser = Yii::$app->user->identity->getId();
 		
+		if(false == Yii::$app->request->post('create')) { // если условие выполняется то данные компании обновятся 
+			$modelCompany = Company::findOne($idCompany);
+		} else {  								// если условие не выполняется тогда будет создана новая компания
+			$modelCompany = new Company();
+			$modelCompany->company_name = Yii::$app->request->post('name');
+			if($modelCompany->validate()) {
+				$modelCompany->save();
+			} else {
+				$this->datas["errors"] = $modelCompany->errors;
+			}
+			$idCompany = $modelCompany->company_id;
+		}	
+		$modelUploadForm = new UploadForm();
+			
+		if(true == Yii::$app->request->post('imagefiledelete')) {	// если фотку компании нужно просто удалить
+			$newImgName = $modelUploadForm->deleteImg(Yii::$app->params['pathToFolderCompanyInWebSite'].$modelCompany->company_image);
+		} else { // если фотку компании нужно загрузить
+			$newImgName = $modelUploadForm->uploadImg(Yii::$app->params['pathToFolderCompanyInWebSite'],$modelCompany->company_image);
+		}
+		$modelCompany->company_image = $newImgName;
+		$modelCompany->save();  // обновление данных компании tbl company
+
+		$phoneMail = Phonemaildata::deleteAll(['idCompany' => $idCompany]); // обновление данных компании tbl phonemaildata
+		foreach($this->tempArray as $fields) {
+			$phoneMail = new Phonemaildata;
+			$phoneMail->attributes = $fields;
+			$phoneMail->idCompany = $idCompany;
+			
+			if($phoneMail->validate()) {
+				if($phoneMail->save()) {
+					$this->datas['success'] = true;
+				} else {
+					$this->datas["errors"][] = 'Phonemaildata is not save';
+				}
+				
+			} else {
+				$this->datas["errors"] = $userInfo->errors;
+			}	
+		}
 		
-// 		$modelPerson = Person::findOne($idUser);
-// 		$companyPerson = $modelPerson->companys;
-// 		if($companyPerson) {
-// 			$this->tempArray = $this->person($idUser,$exeptionFields);
-// 			$scope = [];
-// 			foreach($modelPerson->companys as $company) {
-// 				$scope[] = $company['company_name']; 
-// 			}
-// 			$this->tempArray['scope'] = $scope;
-// 		}
 		if(!empty($this->tempArray)) {
+				$this->datas['success'] = true;
+		}
+		$this->datas[self::DATAS] = $this->tempArray;
+		return $this->datas;
+	}
+	
+	public function actionDeletecompany()
+	{
+		$idCompany = Yii::$app->request->post('id');
+		$idUser = Yii::$app->user->identity->getId();
+		$modelCompanyPerson = CompanyPerson::findOne(['idPerson' => $idUser, 'company_id' => $idCompany]);
+		if($modelCompanyPerson->delete()) {
 				$this->datas['success'] = true;
 		}
 		$this->datas[self::DATAS] = $this->tempArray;
@@ -648,7 +635,7 @@ class ProfileController extends MainapiController
 			$tempArray['id'] = $userInfo->id;
 			$tempArray['city'] = $userInfo->city; 
 			$tempArray['country'] = $userInfo->country; 
-			$tempArray['info'] = $userInfo->welcome;
+			$tempArray['info'] = $userInfo->info;
 			$tempArray['image'] = Url::to('@web/uploads/userAvatars/smallSize/',true) . '/' .$userInfo->photo;
 			$tempArray['descr'] = $userInfo->descr;
 			$tempArray['name'] = $userInfo->name;

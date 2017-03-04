@@ -14,6 +14,9 @@ return [
 			'prefEnablePushPhotoWithMe'=>'boolean',
 			'prefEnablePushEventAlarm'=>'boolean',
 			'prefEnablePushNewEvent'=>'boolean'
-    ]
+    ],
+    'pathToFolderPersonInWebSite' => 'con-col.picom.su/zBoxuersk/person/',
+    'pathToFolderCompanyInWebSite' => 'con-col.picom.su/zBoxuersk/company/', 
+    'pathToFolderEventInWebSite' => 'con-col.picom.su/zBoxuersk/gallery/',
     
 ];

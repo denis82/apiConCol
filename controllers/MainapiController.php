@@ -21,6 +21,7 @@ class MainapiController  extends Controller
 	const DATAS = 'datas';
 	const ACTION = 'action';
 	const INFOTYPE = 'infotype';
+
 	
 	public function behaviors()
     {
@@ -30,6 +31,8 @@ class MainapiController  extends Controller
         $behaviors['authenticator']['optional'] = ['listindex','catalogindex','dataindex'];
         return $behaviors;
     }
+    
+
     
     public function checkAuth()
     {

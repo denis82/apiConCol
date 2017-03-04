@@ -10,6 +10,7 @@ use yii\helpers\ArrayHelper;
 class Data extends CommonLDC
 {   
 	public $tempArray = [];
+	public $getImgPath;
 
 	public function dataListAbout($ids,$infotype = false)
 	{
@@ -19,71 +20,51 @@ class Data extends CommonLDC
 	public function dataListCompany($ids,$infotype)
     {
 		$modelCompany = Company::findAll($ids);
+ 		$serverName = Yii::$app->request->serverName;
+ 		$fullPath = $_SERVER['DOCUMENT_ROOT'];
+ 		$this->getImgPath = str_replace($serverName, "", $fullPath).Yii::$app->params['pathToFolderPersonInWebSite'];
 		foreach($modelCompany as $company) {
 			$list = [];
+			$listPer = [];
+			$fieldsPer = [];
 			$list['kind'] = $infotype;
-			$list['title'] = '';
+			$list['title'] = $company['company_name'];
 			$list['info'] = $company['company_anons'];
 			$list['id'] = $company['company_id'];
-			//$list['date'] = strtotime($company['event_date']);
+			//$list['back'] = "http:\/\/s.androidinsider.ru\/2016\/10\/android.@750.png";
 			$list['name'] = $company['company_name'];
-			$list['withDividers'] = true;
-			$list['image'] = '';
-			$list['fields'] = [
-									[	'type' => 'button',
-										'name' => 'Name', 
-										'kind' => 'Page'
+			$list['withDividers'] = false;
+			$list['image'] = Yii::getAlias('@imgHost/images/company/'. $company['company_image']);
+			foreach($company->persons as $person) {
+					$listPer = [];
+					$listPer['type'] = "info";
+					$listPer['name'] = $person['surname'] . ' '.$person['name'];
+					$listPer['info'] = $person['descr'];
+					$listPer['image'] = Yii::getAlias('@imgHost/images/person/'. $person['photo']);
+					$listPer['kind'] = "data/person";
+					$listPer['style'] = "round";
+					$listPer['id'] = $person['id'];
+					$fieldsPer[] = $listPer;
+			}
+			$list['fields'] = 	[
+									[
+										"type" => "info",
+										"name" => $company['company_name'],
+										"info" => $company['company_anons'],
+										"id" => 0
 									],
 									[
-										'type' => 'separator',
-									],
-									[	'type' => 'text',
-										'info' => 'text',
-									],
-									
-									[
-										'type' => 'separator',
-									],
-									
-									[	'type' => 'next',
-										'name' => 'Материалы', 
-										'kind' => 'data\/resource',
-										"id" => ''
-									],
-									
-									[
-										'type' => 'separator',
-									],
-									
-									[	'type' => 'next',
-										'name' => 'Материалы', 
-										'kind' => 'data\/resource',
-										"id" => ''
-									],
-									
-									[	'type' => 'next',
-										'name' => 'Nmae',
-										'kind' => 'Page',
-										'image' => '#'
-									],
-									[	'type' => 'info',
-										'style' => 'Style',
-										'image' => '#',
-										'kind' => 'king'
-									],
-									[	'type' => 'group',
-										'name' => 'Name',
-										'style' => 'Style',
-										'image' => 'icon',
-										'kind' => 'kind',
-										'fields' => [
-											'type' => 'info',
-											'style' => 'Style',
-											'image' => '#',
-											'kind' => 'king'
-											]
+										"type" => "group",
+										"name" => "",
+										"style" => "empty",
+										"id" => 0,
+										"withDividers" => true,
+										"fields" => 	$fieldsPer
+										
 									]
-								   ];
+									
+								];
+								   
 			$this->tempArray[] = $list;
 		}
 		return $this->tempArray;
@@ -156,7 +137,7 @@ class Data extends CommonLDC
 									
 									[	'type' => 'next',
 										'name' => 'Расписание', 
-										'kind' => 'page\/timeline\/4369\/4370',
+										'kind' => 'page/timeline\/4369\/4370',
 										"id" => $event['gallery_gr_id']
 									],
 									
@@ -167,7 +148,7 @@ class Data extends CommonLDC
 									
 									[	'type' => 'next',
 										'name' => 'Материалы', 
-										'kind' => 'data\/resource',
+										'kind' => 'data/resource',
 										"id" => $event['event_id']
 									],
 									
@@ -190,209 +171,66 @@ class Data extends CommonLDC
 		}
 		return $this->tempArray;
 	}
-	
-	
-	public function dataListExpert($ids,$infotype)
+    
+    public function dataListPerson($ids,$infotype)
     {
+		$arExpert = [];
+		$arPhoto = [];
  		$modelPerson = Person::findAll($ids);
-// 		$modelCompany = Company::findAll($ids);
  		foreach($modelPerson as $person) {
  			$list = [];
  			$listEvent = [];
- 			$list['title'] = 'Эксперт';
+ 			$list['title'] = $person['surname'].' '.$person['name'].' '.$person['middlename'];
+ 			if ('expert' == $infotype) {
+				$list['title'] = 'Эксперт';
+			}
  			$list['image'] = Yii::getAlias('@imgHost/zBoxuersk/gallery/'.$person['photo']);
  			$list['back'] = Yii::getAlias('@imgHost/zBoxuersk/gallery/'.$person['photo']);
  			$list['kind'] = $infotype;
  			$list['name'] = $person['surname'].' '.$person['name'].' '.$person['middlename'];
  			$list['id'] = $person['id'];
  			$list['withDividers'] = true;
- 			foreach ($person->experts as $eventExpert) {
-				$listEvent = [] ;
-				$listEvent['type'] = 'event';
-				$listEvent['name'] = $eventExpert['event_name'];
-				$listEvent['kind'] = 'data\/event';
-				$listEvent['hint'] = '';
-				$listEvent['place'] = '';
-				$listEvent['id'] = $eventExpert['event_id'];
-				$listEvent['date'] = strtotime($eventExpert['event_date']);
-				$list['fields'][] = $listEvent;
- 			}
- 			
-//  			$list['fields'] = [
-// 								[
-// 									'type' => 'group',
-// 									'name' => '',
-// 									'style' => 'empty',
-// 									'id' => 0,
-// 									'fields' => [
-// 													'type' => 'info',
-// 													'name' => 'Програмно-информационное сообщество лейся программа прямо в компьютер на каждом шагу',
-// 													'info' => 'Директор',
-// 													'image' => 'http:\/\/o-planete.ru\/wp-content\/uploads\/2013\/05\/%D1%8D%D1%82%D0%BD%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F-%D1%81%D1%82%D1%80%D1%83%D0%BA%D1%82%D1%83%D1%80%D0%B0-%D0%BD%D0%B0%D1%81%D0%B5%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F-.jpg',
-// 													'kind' => 'data\/company',
-// 													'style' => 'round',
-// 													'id' => 203
-// 												]
-// 								],
-// 								[
-// 									'type' => 'text',
-// 									'name' => '',
-// 									'info' => 'Селитроваре лицеисту.\nФиллофорами обжалуешь фортификации откроил насурьмлённомся разопрелом олицетворить удаленькой измерительному оторопелым термофобах чаусы ссыпальщик препаровочную наростам бахчи.\nВымахивать полугодках водопольем отдерёмойся рвения меткости нездорового спазмолитическими проезжающим аппендикса.\nРубило сонетки перебрызганными неограниченности скидам побранивающимся расторговавшему хлорофосам.',
-// 									'id' => 0
-// 								],
-// // 								[
-// // 									'type' => 'event',
-// // 									'name' => 'Мероприятие 1 года',
-// // 									'kind' => 'data\/event',
-// // 									'hint' => 'Деловой клубный вечер',
-// // 									'place' => 'г. Ижевск ул. Воткинское Шоссе 220',
-// // 									'id' => 501,
-// // 									'date' => 2105656435
-// // 								],
-// // 								[
-// // 									'type' => 'event',
-// // 									'name' => 'Мероприятие 1 года',
-// // 									'kind' => 'data\/event',
-// // 									'hint' => 'Деловой клубный вечер',
-// // 									'place' => 'г. Ижевск ул. Воткинское Шоссе 220',
-// // 									'id' => 502,
-// // 									'date' => 2105656435
-// // 								],
-// // 								[
-// // 									'type' => 'event',
-// // 									'name' => 'Мероприятие 1 года',
-// // 									'kind' => 'data\/event',
-// // 									'hint' => 'Деловой клубный вечер',
-// // 									'place' => 'г. Ижевск ул. Воткинское Шоссе 220',
-// // 									'id' => 503,
-// // 									'date' => 2105656435
-// // 								],
-// 								[
-// 									'type' => 'group',
-// 									'name' => 'Галерея',
-// 									'image' => 'http:\/\/s.androidinsider.ru\/2016\/11\/12Sea.@750.jpg',
-// 									'kind' => 'album',
-// 									'style' => 'hnext',
-// 									'id' => 161,
-// 									'fields' => [
-// 													[
-// 														'type' => 'info',
-// 														'name' => '',
-// 														'image' => 'https:\/\/encrypted-tbn2.gstatic.com\/images?q=tbn:ANd9GcQr2Ri6ZLeoOry_br1Rt4RVN5qFNnatxdiKMLNs82Jv5LAk4CCx',
-// 														'kind' => 'photo\/https:\/\/encrypted-tbn2.gstatic.com\/images?q=tbn:ANd9GcQr2Ri6ZLeoOry_br1Rt4RVN5qFNnatxdiKMLNs82Jv5LAk4CCx',
-// 														'style' => 'rect',
-// 														'id' => 0
-// 													],
-// 													[
-// 														'type' => 'info',
-// 														'name' => '',
-// 														'image' => 'https:\/\/encrypted-tbn2.gstatic.com\/images?q=tbn:ANd9GcR5jGG-uKd2Fiz6419sPP7NvxRw1kpzK61XXYkvyUO6hjGfap9U',
-// 														'style' => 'rect',
-// 														'id' => 0
-// 														
-// 													],
-// 													[
-// 														'type' => 'info',
-// 														'name' => '',
-// 														'image' => 'https:\/\/encrypted-tbn2.gstatic.com\/images?q=tbn:ANd9GcR5jGG-uKd2Fiz6419sPP7NvxRw1kpzK61XXYkvyUO6hjGfap9U',
-// 														'style' => 'rect',
-// 														'id' => 0
-// 														
-// 													],
-// 									
-// 												]
-// 								]
-// 
-//  						];
+ 			$arExpert = $this->experts($person->experts);
+ 			$arPhoto = $this->personphotos($person->personphotos);
+ 			$list['fields'] = [
+								[
+									'type' => 'group',
+									'name' => '',
+									'style' => 'empty',
+									'id' => 0,
+									'fields' => [	
+													[
+													'type' => 'info',
+													'name' => 'Програмно-информационное сообщество лейся программа прямо в компьютер на каждом шагу',
+													'info' => 'Директор',
+													'image' => 'http:\/\/o-planete.ru\/wp-content\/uploads\/2013\/05\/%D1%8D%D1%82%D0%BD%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F-%D1%81%D1%82%D1%80%D1%83%D0%BA%D1%82%D1%83%D1%80%D0%B0-%D0%BD%D0%B0%D1%81%D0%B5%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F-.jpg',
+													'kind' => 'data/company',
+													'style' => 'round',
+													'id' => $person->companyid[0]["idCompany"],
+													]
+												]
+								],
+								[
+									'type' => 'text',
+									'name' => '',
+									'info' => 'Селитроваре лицеисту.\nФиллофорами обжалуешь фортификации откроил насурьмлённомся разопрелом олицетворить удаленькой измерительному оторопелым термофобах чаусы ссыпальщик препаровочную наростам бахчи.\nВымахивать полугодках водопольем отдерёмойся рвения меткости нездорового спазмолитическими проезжающим аппендикса.\nРубило сонетки перебрызганными неограниченности скидам побранивающимся расторговавшему хлорофосам.',
+									'id' => 0
+								],
+								$arExpert,
+								[
+									'type' => 'group',
+									'name' => 'Галерея',
+									'image' => Yii::getAlias('@imgHost/zBoxuersk/gallery/'.$person['photo']),
+									'kind' => 'album',
+									'style' => 'hnext',
+									'id' => $person['id'],
+									'fields' => $arPhoto,
+								]
+
+ 						];
  			$this->tempArray[] = $list;
  		}
- 		return $list['fields'];//$this->tempArray;
-    }
-	
-    public function dataListMy($ids)
-    {
-		//$list = Event::find()->where(['id' => $ids])->with('experts.persons')->one();
-
-// 		if($listPerson) {
-// 			$list = [];
-// 			foreach($listPerson->experts as $per) {
-// 				$tempArray = [];
-// 				$tempArray['id'] = $per['idUser'];
-// 				if($per->persons) {
-// 					foreach($per->persons as $key => $res) {
-// 						if($per['idUser'] == $res['id']) {
-// 							$tempArray['image'] = $res['photo'];
-// 							$tempArray['info'] = $res['descr'];
-// 							$tempArray['name'] = $res['name'];
-// 						} 
-// 					}
-// 				} else {
-// 					$tempArray['image'] = '';
-// 					$tempArray['info'] = '';
-// 					$tempArray['name'] = '';
-// 				}
-// 				$tempArray['date'] = 0;
-// 				$tempArray['hint'] = '';
-// 				$tempArray['kind'] = '';
-// 				$list[] = $tempArray;
-// 			}
-// 			return $list ;
-// 		} else {
-// 			return $list = [];
-// 		}
-		return $list = [];
-    }
-    
-    public function dataListPerson($ids,$infotype)
-    {
-		$modelCompany = Person::findAll($ids);
-		foreach($modelCompany as $company) {
-			$list = [];
-			$list['kind'] = $infotype;
-			$list['title'] = '';
-			$list['info'] = $company['descr'];
-			$list['id'] = $company['id'];
-			//$list['date'] = strtotime($company['event_date']);
-			$list['name'] = $company['name'];
-			$list['withDividers'] = true;
-			$list['image'] = '';
-			$list['fields'] = [
-									[	'type' => 'button',
-										'name' => 'Name', 
-										'kind' => 'Page'
-									],
-									[
-										'type' => 'separator',
-									],
-									[	'type' => 'text',
-										'info' => 'text',
-									],
-									[	'type' => 'next',
-										'name' => 'Nmae',
-										'kind' => 'Page',
-										'image' => '#'
-									],
-									[	'type' => 'info',
-										'style' => 'Style',
-										'image' => '#',
-										'kind' => 'king'
-									],
-									[	'type' => 'group',
-										'name' => 'Name',
-										'style' => 'Style',
-										'image' => 'icon',
-										'kind' => 'kind',
-										'fields' => [
-											'type' => 'info',
-											'style' => 'Style',
-											'image' => '#',
-											'kind' => 'king'
-											]
-									]
-								   ];
-			$this->tempArray[] = $list;
-		}
-		return $this->tempArray;
+ 		return $this->tempArray;
     }   
     
     public function dataListResource($ids,$infotype = false)
@@ -426,6 +264,38 @@ class Data extends CommonLDC
 			return $list = [1];
 		}
     }
+    
+    private function personphotos($personphotos) 
+    {
+		$arPhoto = [];
+		foreach($personphotos as $photo) {
+			$listPhoto = [];
+			$listPhoto['type'] = 'info';
+			$listPhoto['name'] = $photo['gallery_name'];
+			$listPhoto['image'] = Yii::getAlias('@imgHost/zBoxuersk/gallery/'.$photo['gallery_image']);
+			$listPhoto['kind'] = 'photo/' . Yii::getAlias('@imgHost/zBoxuersk/gallery/'.$photo['gallery_image']);
+			$listPhoto['style'] = 'rect';
+			$listPhoto['id'] = $photo['gallery_id'];
+			$arPhoto[] = $listPhoto;
+		}
+ 		return 	$arPhoto;
+    }
+    private function experts($experts) 
+    {
+		$arExpert = [];
+		foreach ($experts as $eventExpert) {
+			$listEvent = [] ;
+			$listEvent['type'] = 'event';
+			$listEvent['name'] = $eventExpert['event_name'];
+			$listEvent['kind'] = 'data\/event';
+			$listEvent['hint'] = '';
+			$listEvent['place'] = '';
+			$listEvent['id'] = $eventExpert['event_id'];
+			$listEvent['date'] = strtotime($eventExpert['event_date']);
+			$arExpert[] = $listEvent;
+		}
+		return $arExpert;
+ 	}		
     
     public function getImagePath() 
     {

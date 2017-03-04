@@ -8,7 +8,7 @@ use app\models\Event;
 use app\models\Person;
 use app\models\Listing;
 use app\models\Company;
-use app\models\Catalog;
+use app\models\Find;
 use yii\base\DynamicModel;
 
 /*	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -36,32 +36,31 @@ use yii\base\DynamicModel;
 /ВАЖНО ЗНАТЬ ВАЖНО ЗНАТЬ ВАЖНО ЗНАТЬ ВАЖНО ЗНАТЬ ВАЖНО ЗНАТЬ ВАЖНО ЗНАТЬ ВАЖНО ЗНАТЬ 
 */
 
-class CatalogController extends MainapiController
+class FindController extends MainapiController
 {
-	public function actionCatalogindex()
+	public function actionFindindex()
     {
 		$tempArray = [];
 		$infotype = Yii::$app->request->post(self::INFOTYPE);
 		$action = Yii::$app->request->post(self::ACTION);
 		$ids = $this->simpleArray(Yii::$app->request->post(self::IDS));
-		if(!in_array($action,['person','event','company','my'])) {
-		
-			$list = new Person;
+		if(!in_array($action,['person','event','company','my'])) { // если ACTION пуст
+			$list = new Find;
 			switch($infotype){
 				case 'expert':
-					$this->tempArray = $list->catalogLP();  // список персон
+					$this->tempArray = $list->findLP();  // список персон
 					break;
 				case 'event':
-					$this->tempArray = $list->catalogLE(); // список событий
+					$this->tempArray = $list->findLE(); // список событий
 					break;
 				case 'company':
-					$this->tempArray = $list->catalogLC(); // список компаний
+					$this->tempArray = $list->findLC(); // список компаний
 					break;
 				default:
 					break;	
 			}			
-		} else {			
-			$modelList = new Catalog;
+		} else {	//  если ACTION не пуст используется функция-дракон "listOfSomething" из класса родителя CommonLDC()
+			$modelList = new Find;
 			if(in_array($infotype,['person','event','company','expert'])) {
 				if($ids) {
 					
@@ -74,7 +73,6 @@ class CatalogController extends MainapiController
 						$ids = [];
 						if($user) {
 							$ids[] = $user->id;
-							//$this->datas['id'] = $access_token;
 						}
 					}
 					$this->tempArray = $modelList->listOfSomething($action,$infotype,array_shift ($ids));

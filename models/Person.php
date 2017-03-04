@@ -11,6 +11,7 @@ class Person extends ActiveRecord
 	const ACCESS_PUBLIC = 2;
 	const EVENT_IBLOCK = 9;
 	
+	
 	public function getPhonemaildatas()
     {
 		//var_dump($this->hasMany(Phonemaildata::className(), ['idPerson' => 'idPerson']));die;
@@ -40,10 +41,15 @@ class Person extends ActiveRecord
             ->viaTable('a_companyPerson', ['idPerson' => 'id']);
     }
     
-    public function getPhotos()
+    public function getCompanyid()
     {
-           return $this->hasMany(Photo::className(), ['id' => 'idPhoto'])
-				->viaTable('a_personPhoto', ['idPerson' => 'id']);
+        return $this->hasMany(CompanyPerson::className(), ['idPerson' => 'id']);
+    }
+    
+    public function getPersonphotos()
+    {
+           return $this->hasMany(Gallery::className(), ['gallery_id' => 'gallery_id'])
+				->viaTable('a_labels', ['idPerson' => 'id']);
     }
     
     /**
@@ -65,6 +71,7 @@ class Person extends ActiveRecord
 			[['city','country'], 'string', 'length' => [2]],
 			['photo','image','extensions' => 'png, jpg'],
 			[['middlename',], 'default', 'value' => ''],
+			[['info'], 'safe'],
 			[['prefConfShowMyPerson','prefConfShowMyPhoto','prefConfShowMyCompany','prefConfShowMyContacts'],'integer'],  
 			[['prefEnablePush',
 				'prefEnablePushNews',

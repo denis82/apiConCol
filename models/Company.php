@@ -8,16 +8,33 @@ use yii\db\ActiveRecord;
 
 class Company extends ActiveRecord 
 {
-// 	// логин пользователя
-//  	public  $id; // идентификатор
-// 	public $name;  //Название
-// 	public $info;  //Описание
-//     public $image;  //Картинка для Preview
-//     public $back;  //Картинка для фона заголовка
-//     public $title;  //Текст заголовка окна
-// 	public $withDividers; // Между элементами есть разделитель
+// 	const SCENARIO_UPDATE = 'update_company';
+// 	
+// 	public function scenarios()
+//     {
+//         return [
+//             self::SCENARIO_UPDATE => ['name'],
+//         ];
+//     }
 
-
+	 public function rules()
+	{
+		return 	[		
+					[['company_name'], 'required']
+				];
+	}
+	
+	public function attributeLabels()
+    {
+        return [
+            'company_name' => 'Название компании',
+            'company_id' => 'идентификатор компании',
+			'company_anons' => 'Анонс',
+			'company_text'=> 'Текс',
+			'company_image'=> 'Фото',
+			'company_logo'=> 'Логотип',
+        ];
+    }
 	 /**
      * @return string название таблицы, сопоставленной с этим ActiveRecord-классом.
      */

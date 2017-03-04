@@ -76,7 +76,7 @@ class AlbumController extends MainapiController
 				$tempArray['right'] = $img->right;
 				$tempArray['top'] = $img->top; 
 				$tempArray['bottom'] = $img->bottom;
-				$tempArray['person'] = $img->person;
+				$tempArray['person'] = $img->idPerson;
 				$tempArray['name'] = $img->name;
 				$tempArray['info'] = $img->info;
 				$this->tempArray[] = $tempArray;
@@ -106,7 +106,7 @@ class AlbumController extends MainapiController
 		$dataLabel = Yii::$app->request->post();
 		$modelLabel = new Label(['scenario' => Label::SCENARIO_KNOWN_PERSON]);
 		$modelLabel->attributes = $dataLabel;
-		$modelLabel->person = Yii::$app->user->identity->getId();
+		$modelLabel->idPerson = Yii::$app->user->identity->getId();
 		$modelLabel->gallery_id = Yii::$app->request->post('id');
 		if($modelLabel->validate()) {
 			if($modelLabel->save()) {
@@ -228,7 +228,7 @@ class AlbumController extends MainapiController
 		$idImage = Yii::$app->request->post('id');
  		$idUser= Yii::$app->user->identity->getId();
 		$labels = Label::find()
-							->where(['person' => $idUser])
+							->where(['idPerson' => $idUser])
 							->andWhere(['gallery_id' => $idImage])
 							->all();
 		if($labels) {					

@@ -12,6 +12,22 @@ use app\models\Company;
 use app\models\Catalog;
 use yii\base\DynamicModel;
 
+/*	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/	В каком порядке могут приходить данные на сервер	
+/!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/	INFOTYPE					RESULT
+/	expert						Информация об эксперте
+/	event						Информация о событии
+/	company						Информация о компании
+/	person						Информация о персоне
+/	resource					Информация об ресурсах (презентации к мероприятию)
+/	my							Мой профиль
+/	about						Страница о программе
+/!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/ВАЖНО ЗНАТЬ ВАЖНО ЗНАТЬ ВАЖНО ЗНАТЬ ВАЖНО ЗНАТЬ ВАЖНО ЗНАТЬ ВАЖНО ЗНАТЬ ВАЖНО ЗНАТЬ 
+/ВАЖНО ЗНАТЬ ВАЖНО ЗНАТЬ ВАЖНО ЗНАТЬ ВАЖНО ЗНАТЬ ВАЖНО ЗНАТЬ ВАЖНО ЗНАТЬ ВАЖНО ЗНАТЬ 
+*/
+
 class DataController extends MainapiController
 {  
 	public function actionDataindex()
@@ -24,12 +40,13 @@ class DataController extends MainapiController
 			$modelData = new Data;
 			switch($infotype){
 				case 'expert':
-					$this->tempArray = $modelData->dataListExpert($ids,$infotype);  // список экспертов dataListExpert
+					$this->tempArray = $modelData->dataListPerson($ids,$infotype);  // список экспертов dataListExpert
 					break;
 				case 'event':
 					$this->tempArray = $modelData->dataListEvent($ids,$infotype); // список событий  dataListEvent
 					break;
 				case 'company':
+					
 					$this->tempArray = $modelData->dataListCompany($ids,$infotype); // список компаний  dataListCompany
 					break;
 				case 'about':
