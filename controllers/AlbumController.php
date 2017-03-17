@@ -4,8 +4,10 @@ namespace app\controllers;
 
 use Yii;
 use app\models\Label;
-use app\models\Groupgallery;
 use yii\base\DynamicModel;
+use yii\helpers\ArrayHelper;
+use app\models\Groupgallery;
+
 
 class AlbumController extends MainapiController
 {
@@ -75,29 +77,34 @@ class AlbumController extends MainapiController
 	
 	public function actionLabels()
     {
-		$idImage = Yii::$app->request->post('id');
- 		$idImage = $this->simpleArray($idImage);
- 		$modelLabel = Label::findAll(['gallery_id' => $idImage]);
- 		
- 		if($modelGroupgallery) {
-			foreach($modelLabel as $img){
-				$tempArray = [];
-				$tempArray['id'] = $img->id; 
-				$tempArray['left'] = $img->left;
-				$tempArray['right'] = $img->right;
-				$tempArray['top'] = $img->top; 
-				$tempArray['bottom'] = $img->bottom;
-				$tempArray['person'] = $img->idPerson;
-				$tempArray['name'] = $img->name;
-				$tempArray['info'] = $img->info;
-				$this->tempArray[] = $tempArray;
-			}
-		}	
- 		
- 		if(!empty($this->tempArray)) {$this->datas['success'] = true;}
-		$this->checkAuth();
-		$this->datas[self::DATAS] = $this->tempArray;
-		return $this->datas;
+       $modelLabel = new Label();
+       $idImage = $this->simpleArray(Yii::$app->request->post('ids'));
+ 
+       $this->tempArray = $modelLabel->getInfoLabel($idImage);
+//       $idImage = Yii::$app->request->post('ids');
+//        $idImage = $this->simpleArray($idImage);
+//        $modelLabel = Label::find()->where(['gallery_id' => $idImage])->all();
+//
+//        if($modelLabel) {
+//            foreach($modelLabel as $img){
+//                $tempArray = [];
+//                $tempArray['id'] = $img->gallery_id; 
+//                $tempArray['labels']['id'] = $img->id; 
+//                $tempArray['labels']['left'] = $img->left;
+//                $tempArray['labels']['right'] = $img->right;
+//                $tempArray['labels']['top'] = $img->top; 
+//                $tempArray['labels']['bottom'] = $img->bottom;
+//                $tempArray['labels']['person'] = $img->idPerson;
+//                $tempArray['labels']['name'] = $img->name;
+//                $tempArray['labels']['info'] = $img->info;
+//                $this->tempArray[] = $tempArray;
+//            }
+//        }	
+//
+//        if(!empty($this->tempArray)) {$this->datas['success'] = true;}
+        $this->checkAuth();
+        $this->datas = $this->datas = ArrayHelper::merge($this->datas, $this->tempArray);
+        return $this->datas;
     }
     
     /*

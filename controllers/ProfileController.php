@@ -9,6 +9,7 @@ use yii\web\Cookie;
 use yii\helpers\Url;
 use app\models\User;
 use app\models\Userb;
+use app\models\Event;
 use yii\helpers\Html;
 use app\models\Login;
 use yii\base\Security;
@@ -226,22 +227,25 @@ class ProfileController extends MainapiController
 
     public function actionEvents()
     {
-        $idUser = Yii::$app->user->identity->getId();
-        $events = EventSubscription::findAll(['idUser' => $idUser]);
-        
-        if ($events) {
-            foreach ($events as $event) {
-                if (self::EVENTREGIST == $event->state) {
-                    $this->tempArray = $event->idEvent;
-                    if(!empty($this->tempArray)) {
-                        $this->datas['success'] = true;
-                    }
-                    $this->datas[self::DATAS][] = $this->tempArray;
-                }
-            }
-        } else {
-            $this->datas[self::DATAS] = [];
-        }
+        $modelEvent = new Event();
+        $this->tempArray = $modelEvent->listPersonEvent();
+//        $idUser = Yii::$app->user->identity->getId();
+//        $events = EventSubscription::findAll(['idUser' => $idUser]);
+//        
+//        if ($events) {
+//            foreach ($events as $event) {
+//                if (self::EVENTREGIST == $event->state) {
+//                    $this->tempArray = $event->idEvent;
+//                    if(!empty($this->tempArray)) {
+//                        $this->datas['success'] = true;
+//                    }
+//                    $this->datas[self::DATAS][] = $this->tempArray;
+//                }
+//            }
+//        } else {
+//            $this->datas[self::DATAS] = [];
+//        }
+        $this->datas = ArrayHelper::merge($this->datas, $this->tempArray);
         $this->checkAuth();
         return $this->datas;
     }
@@ -320,11 +324,9 @@ class ProfileController extends MainapiController
     /	
     */
 
-    //!!!!!!! не работает, база изменилась !!!!!!!!!! 
     // вывод фоток на которых я(или кто-то) отметил меня
     public function actionPhotoswithme()
     {
-
         $idUser = Yii::$app->user->identity->getId();
         if($idUser) {
             $photos = Person::find()
@@ -496,87 +498,8 @@ class ProfileController extends MainapiController
         $modelCompany = new Company();
         $idCompany = Yii::$app->request->post('id');
         $this->tempArray = $modelCompany->updatePersonCompany($idCompany);
-       
-       
-//        $this->tempArray = Yii::$app->request->post('fields');
-//         $idUser = Yii::$app->user->identity->getId();
-//         
-//         $modelCompany = Company::findOne($idCompany);
-//         $modelUploadForm = new UploadForm();
-//         
-//         // если условие выполняется то данные компании обновятся 
-//         
-//         if(true != Yii::$app->request->post('create')) {	
-//             if(true == Yii::$app->request->post('imagefiledelete')) {	// если фотку компании нужно просто удалить
-//                 $modelCompany->company_image = $modelUploadForm->deleteImg(Yii::$app->params['pathToFolderCompanyInWebSite'],$modelCompany->company_image);
-//             } else { // если фотку компании нужно загрузить
-//                 $modelCompany->company_image = $modelUploadForm->uploadImg(Yii::$app->params['pathToFolderCompanyInWebSite'],$modelCompany->company_image);
-//             }
-//             $modelCompany->save();
-//         }
-//         
-//         // если условие выполняется компания будет создана 
-//         
-//         if(true == Yii::$app->request->post('create')) {  
-//             $modelCompany = new Company();
-//             $idCompany = $modelCompany->create_company(Yii::$app->request->post('name'),$idUser);
-//             $modelCompany->update_company($idCompany,Yii::$app->request->post());
-//             $modelCompany->company_image = $modelUploadForm->uploadImg(Yii::$app->params['pathToFolderCompanyInWebSite']);
-//             $modelCompany->save();
-//         }
-        
-      //  $this->datas['errors'] = $modelCompany->update_company($idCompany);
-       // $this->tempArray = $this->company($idUser,$idCompany,['surname', 'middlename']);
-        //$this->tempArray['scope'] = '';
-        
-        
-        
-    // 		if(false == Yii::$app->request->post('create')) { // если условие выполняется то данные компании обновятся 
-    // 			$modelCompany = Company::findOne($idCompany);
-    // 		} else {  								// если условие не выполняется тогда будет создана новая компания
-    // 			$modelCompany = new Company();
-    // 			$modelCompany->company_name = Yii::$app->request->post('name');
-    // 			if($modelCompany->validate()) {
-    // 				$modelCompany->save();
-    // 			} else {
-    // 				$this->datas["errors"] = $modelCompany->errors;
-    // 			}
-    // 			$idCompany = $modelCompany->company_id;
-    // 		}	
-    // 		$modelUploadForm = new UploadForm();
-    // 			
-    // 		if(true == Yii::$app->request->post('imagefiledelete')) {	// если фотку компании нужно просто удалить
-    // 			$newImgName = $modelUploadForm->deleteImg(Yii::$app->params['pathToFolderCompanyInWebSite'].$modelCompany->company_image);
-    // 		} else { // если фотку компании нужно загрузить
-    // 			$newImgName = $modelUploadForm->uploadImg(Yii::$app->params['pathToFolderCompanyInWebSite'],$modelCompany->company_image);
-    // 		}
-    // 		$modelCompany->company_image = $newImgName;
-    // 		$modelCompany->save();  // обновление данных компании tbl company
-    // 
-    // 		$phoneMail = Phonemaildata::deleteAll(['idCompany' => $idCompany]); // обновление данных компании tbl phonemaildata
-    // 		foreach($this->tempArray as $fields) {
-    // 			$phoneMail = new Phonemaildata;
-    // 			$phoneMail->attributes = $fields;
-    // 			$phoneMail->idCompany = $idCompany;
-    // 			
-    // 			if($phoneMail->validate()) {
-    // 				if($phoneMail->save()) {
-    // 					$this->datas['success'] = true;
-    // 				} else {
-    // 					$this->datas["errors"][] = 'Phonemaildata is not save';
-    // 				}
-    // 				
-    // 			} else {
-    // 				$this->datas["errors"] = $userInfo->errors;
-    // 			}	
-    // 		}
-        
-//         if(!empty($this->tempArray)) {
-//                 $this->datas['success'] = true;
-//         }
         $this->datas = ArrayHelper::merge($this->datas, $this->tempArray);
         $this->checkAuth();
-        //$this->datas[self::DATAS] = $this->tempArray;
         return $this->datas;
     }
 
@@ -646,49 +569,5 @@ class ProfileController extends MainapiController
         } else {
             return $tempArray = [];
         }
-    }
-
-    /*  Возвращяет подробный список сведений о компании
-    /	вход: 	$userInfo - [Integer] - id персоны
-    /			$idCompany - [Integer] - id компании
-    /			$exeption - [Array] поля которые не нужны
-    /	выход:  [Array] 
-    /					  данные о компании
-    /	
-    */
-
-    public function company($userInfo = false,$idCompany = false,$exeption = [])
-    {
-        $arPhonemaildata = [];
-        if($idCompany) {
-            $companyInfo = Phonemaildata::findAll(['idCompany' =>$idCompany]);
-            foreach($companyInfo as  $fields) {
-                $arPhonemaildata[] = $fields;
-            }
-        
-            $companyInfo = Company::findOne($idCompany);
-            foreach($companyInfo as $key => $info) {
-                //$tempArray[$key] = $info;
-                //$tempArray['image'] = Url::to('@web/uploads/userAvatars/smallSize/',true) . '/' .$info;
-            }
-            //$tempArray =[];
-            $tempArray['name'] = $companyInfo->company_name;
-            $tempArray['logo'] = $companyInfo->company_logo;
-            $tempArray['scope'] = '';//$companyInfo->company_name; 
-            $tempArray['contact'] = '';//company_anons; 
-            $tempArray['image'] = Yii::getAlias('@imgHost/zBoxuersk/company/') . '/' . $companyInfo->company_image;
-            $tempArray['contact'] = $companyInfo->company_anons; 
-            $tempArray['info'] = $companyInfo->company_anons;
-        }	
-            $tempArray['fields'] = $arPhonemaildata;
-            if(empty($exeption)) {
-                
-                return $tempArray;
-            } else {
-                foreach($exeption as $exept) {
-                    \yii\helpers\ArrayHelper::remove($tempArray, $exept);
-                }
-                return $tempArray;
-            }
     }
 }
