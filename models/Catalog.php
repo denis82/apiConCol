@@ -26,21 +26,21 @@ class Catalog extends CommonLDC
 		if($listObj) {
 			$list = [];
 			foreach($listObj as $per) {
-				$tempArray = [];
-				$tempArray['id'] = $per['id'];
-				$tempArray['image'] = Yii::getAlias('@imgHost/zBoxuersk/position_author/'.$per['position_author_image']);
-				if(empty($per->companyid)) {
-						$tempArray['info'] = Clearstr::clear($per['descr']);
-				} else {
-					$tempArray['info'] = $this->companys($per);
-				}
-				$tempArray['name'] = $per['surname'] . ' ' . $per['firstname'];
- 				$tempArray['date'] = 0;
- 				$tempArray['company'] = '';//$per->companys;
- 				//$tempArray['pos'] = $per->companyid;
-				$tempArray['hint'] = '';
-				$tempArray['kind'] = '';
-				$list[] = $tempArray;
+                            $tempArray = [];
+                            $tempArray['id'] = $per['id'];
+                            $tempArray['image'] = Yii::getAlias('@imgHost/zBoxuersk/position_author/'.$per['position_author_image']);
+                            if(empty($per->companyid)) {
+                                $tempArray['info'] = Clearstr::clear($per['descr']);
+                            } else {
+                                $tempArray['info'] = $this->companys($per) . Clearstr::clear($per['descr']);
+                            }
+                            $tempArray['name'] = $per['surname'] . ' ' . $per['firstname'];
+                            $tempArray['date'] = 0;
+                            $tempArray['company'] = '';//$per->companys;
+                            //$tempArray['pos'] = $per->companyid;
+                            $tempArray['hint'] = '';
+                            $tempArray['kind'] = '';
+                            $list[] = $tempArray;
 			}
 			return $list;
 		} else {
@@ -326,22 +326,19 @@ class Catalog extends CommonLDC
     
      private function companys($personInfo) 
     {
-		$comp = '';
- 			foreach ($personInfo->companyid as $person) {
-					$info = [];
-					$tempArray = [];
- 					foreach($personInfo->companys as $company) {
-						if ($person['company_id'] == $company['company_id']) {
-							$info[0] = Clearstr::clear($company['company_name']);
-							$info[2] = Clearstr::clear($company['company_anons']);
-						}
- 					}
- 					$info[1] = Clearstr::clear($person['position']);
- 					ksort($info); 
- 					$comp .= implode("\n", $info)."\n";
-		
- 			}
-			return $comp;	
-		
+        $comp = '';
+        foreach ($personInfo->companyid as $person) {
+            $info = [];
+            $tempArray = [];
+            foreach($personInfo->companys as $company) {
+                if ($person['company_id'] == $company['company_id']) {
+                    $info[0] = Clearstr::clear($company['company_name']);
+                }
+            }
+            $info[1] = Clearstr::clear($person['position']);
+            ksort($info); 
+            $comp .= implode("\n", $info)."\n";
+        }
+            return $comp;	
     }
 }

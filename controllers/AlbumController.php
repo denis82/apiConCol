@@ -25,13 +25,12 @@ class AlbumController extends MainapiController
 
 	public function init(){
 	   parent::init();
-	   $this->optionalActions = ['index','labels','labelme','labelperson','labelunknown','labelremove','labelmeremove'];
+	   $this->optionalActions = ['index','labels','labelperson','labelunknown','labelremove','labelmeremove'];
 	}
 	
 	
 	public function actionIndex()
     {
-		
  		$idAlbum = Yii::$app->request->post('ids');
  		$idAlbum = $this->simpleArray($idAlbum);
   		$modelGroupgallery = GroupGallery::findAll($idAlbum);
@@ -53,7 +52,6 @@ class AlbumController extends MainapiController
 				$this->tempArray[] = $tempIndex;
 			}
  		}
-		
 		if(!empty($this->tempArray)) {$this->datas['success'] = true;}
 		$this->checkAuth();
 		$this->datas[self::DATAS] = $this->tempArray;

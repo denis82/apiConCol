@@ -58,11 +58,13 @@ class Company extends ActiveRecord
             $fields = [];
         } else {
             $fields = Yii::$app->request->post('fields');
-            $this->attributes = Yii::$app->request->post();
-            if($this->validate()) {
-                $this->save();
+            $modelCompany = self::find()->where(['company_id' =>$idCompany])->one();
+            $modelCompany->attributes = Yii::$app->request->post();
+            $modelCompany->company_name = Yii::$app->request->post('name');
+            if($modelCompany->validate()) {
+                $modelCompany->save();
             } else {
-                $datas[] = $userInfo->errors;
+                $datas[] = $modelCompany->errors;
             }
             $phoneMail = Phonemaildata::deleteAll(['idCompany' => $idCompany]); // обновление данных компании tbl phonemaildata
         }
@@ -77,7 +79,7 @@ class Company extends ActiveRecord
                     $datas[] = 'Phonemaildata is not save';
                 }
             } else {
-                $datas[] = $userInfo->errors;
+                $datas[] = $phoneMail->errors;
             }	
         }
         return $datas;
@@ -148,8 +150,8 @@ class Company extends ActiveRecord
         }
         
         // если условие выполняется компания будет создана 
-        
-        if(true == Yii::$app->request->post('create')) {  
+        $res[] = Yii::$app->request->post('create');
+        if(true == Yii::$app->request->post('create')) {              
             $idCompany = $this->createCompany(Yii::$app->request->post('name'),$idUser);
             $this->updateCompany($idCompany,Yii::$app->request->post());
             $this->company_image = $modelUploadForm->uploadImg(Yii::$app->params['pathToFolderCompanyInWebSite']);
@@ -179,7 +181,6 @@ class Company extends ActiveRecord
             foreach($companyInfo as  $fields) {
                 $arPhonemaildata[] = $fields;
             }
-        
             $companyInfo = Company::findOne($idCompany);
             foreach($companyInfo as $key => $info) {
                 //$tempArray[$key] = $info;
@@ -190,7 +191,7 @@ class Company extends ActiveRecord
             $tempArray['logo'] = $companyInfo->company_logo;
             $tempArray['scope'] = '';//$companyInfo->company_name; 
             $tempArray['contact'] = '';//company_anons; 
-            $tempArray['image'] = Yii::getAlias('@imgHost/zBoxuersk/company/') . '/' . $companyInfo->company_image;
+            $tempArray['image'] = Yii::getAlias('@imgHost/zBoxuersk/company/') . $companyInfo->company_image;
             $tempArray['contact'] = $companyInfo->company_anons; 
             $tempArray['info'] = $companyInfo->company_anons;
         }   
