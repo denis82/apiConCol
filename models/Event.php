@@ -1,14 +1,27 @@
 <?php
 
+/**
+ * @link http://www.con-col.com/
+ * @copyright Copyright (c) 2017 Picom
+ */
+
 namespace app\models;
 
 use Yii;
 use yii\db\ActiveRecord;
 
+/**
+ *
+ * @author Telegin Denis <dtelegin.spok@yandex.ru>
+ */
+
 class Event extends ActiveRecord 
 {
+ 
     const EVENT_UNREGIST = 2;
-    
+    /**
+     * @var array
+     */
     public $dataResult = [];
     
         
@@ -43,6 +56,12 @@ class Event extends ActiveRecord
     {
         return "event" ;
     }
+    
+    /**
+     * Метод возвращает список событий на которые пользователь зарегистрировался в виде массива
+     * @return array 
+     * @since 2.0.7
+     */
     
     public function listPersonEvent() 
     {    

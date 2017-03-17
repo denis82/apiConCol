@@ -37,16 +37,16 @@ use yii\filters\auth\HttpBearerAuth;
 
 class ProfileController extends MainapiController
 {
-    public $id = 'id';
-    public $sort = 30;
+
+    /**
+     * @var string
+     */
     public $date = 'date';
-    public $name = 'name';
-    public $info = 'info';
-    public $image = 'image';
-    public $active = 'active';
+    /**
+     * @var int
+     */
     public $stateDefault = 400;
-    public $bornDate = 'bornDate';
-    public $findName = 'findName';
+ 
             
     const VERSION = 1;
     const EVENTREGIST = 1;
@@ -115,7 +115,13 @@ class ProfileController extends MainapiController
         $this->datas[self::DATAS] = $this->tempArray;
         return $this->datas;
     }
-
+    
+    /**
+     * Returns message file path for the specified language and category.
+     *
+     * @param string $language the target language
+     * @return string path to message file
+     */
 
     /*  Авторизация
     /	вход: пароль, логин
