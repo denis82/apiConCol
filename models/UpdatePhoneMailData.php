@@ -6,10 +6,6 @@ use yii\db\ActiveRecord;
 
 class UpdatePhoneMailData extends Model
 {
-
-
-	
-	//public id;
 	public $idPerson;
 	public $date;
 	public $name;

@@ -2,15 +2,112 @@
 
 namespace app\models;
 
+use Yii;
+use yii\helpers\ArrayHelper;
 use yii\db\ActiveRecord;
+use app\myclass\Clearstr;
 use app\models\Phonemaildata;
 use app\models\TrustedUsers;
 use yii\base\Model;
+
 
 class Catalog extends CommonLDC
 {
 	const NOTRUST = 0; 
  
+	/*
+	/  возращает список Экспертов для пустого action
+	/
+	/
+	*/
+	public function catalogLP()
+	{
+ 		$listObj = Person::find()->with(['companys','companyid'])->where(['>', 'level', 0 ])->orderBy('surname')->all();
+		if($listObj) {
+			$list = [];
+			foreach($listObj as $per) {
+				$tempArray = [];
+				$tempArray['id'] = $per['id'];
+				$tempArray['image'] = Yii::getAlias('@imgHost/zBoxuersk/position_author/'.$per['position_author_image']);
+				if(empty($per->companyid)) {
+						$tempArray['info'] = Clearstr::clear($per['descr']);
+				} else {
+					$tempArray['info'] = $this->companys($per);
+				}
+				$tempArray['name'] = $per['surname'] . ' ' . $per['firstname'];
+ 				$tempArray['date'] = 0;
+ 				$tempArray['company'] = '';//$per->companys;
+ 				//$tempArray['pos'] = $per->companyid;
+				$tempArray['hint'] = '';
+				$tempArray['kind'] = '';
+				$list[] = $tempArray;
+			}
+			return $list;
+		} else {
+			return $list = [];
+		}
+	}
+	
+	/*
+	/  возращает список Событий для пустого action
+	/
+	/
+	*/
+	
+	public function catalogLE()
+	{
+ 		$listObj = Event::find()->where(['>', 'event_visible', 0 ])->orderBy(['event_date' => SORT_DESC])->all();
+		if($listObj) {
+			$list = [];
+			foreach($listObj as $per) {
+				$tempArray = [];
+				$tempArray['id'] = $per['event_id'];
+				$tempArray['image'] = $per['event_image'];
+				$tempArray['name'] = Clearstr::clear($per['event_name']);
+				$tempArray['info'] = Clearstr::clear($per['event_anons']);
+ 				$tempArray['date'] = strtotime($per['event_date']);
+				$tempArray['hint'] = '';
+				$tempArray['kind'] = '';
+				$list[] = $tempArray;
+			}
+			return $list;
+		} else {
+			return $list = [];
+		}
+	}
+	
+	/*
+	/  возращает список Компаний для пустого action
+	/
+	/
+	*/
+	
+	public function catalogLC()
+	{
+ 		$listObj = Company::find()->where(['>', 'company_visible', 0 ])->orderBy('company_name')->all();
+		if($listObj) {
+			$list = [];
+			foreach($listObj as $per) {
+				$tempArray = [];
+				$tempArray['id'] = $per['company_id'];
+				$tempArray['image'] =	Yii::getAlias('@imgHost/zBoxuersk/company/' . $per['company_image']); 
+				$tempArray['name'] = Clearstr::clear($per['company_name']);
+				$tempArray['info'] = Clearstr::clear($per['company_anons']);
+ 				$tempArray['date'] = 0;
+				$tempArray['hint'] = '';
+				$tempArray['kind'] = '';
+				$list[] = $tempArray;
+			}
+			ArrayHelper::multisort($list, ['name'], [SORT_ASC]);
+			return $list;
+		} else {
+			return $list = [];
+		}
+	}
+ 
+	/*
+	/	компании пользователя
+	*/
 	public function PersonCompany($ids)
     {
 		
@@ -31,6 +128,11 @@ class Catalog extends CommonLDC
 			return $list = [];
 		}
     }
+    
+    /* 
+    /	мероприятия на которые зарегистрировался пользователь
+    */
+    
     public function PersonEvent($ids)
     {
     
@@ -52,6 +154,10 @@ class Catalog extends CommonLDC
 			return $list = [];
 		}
     }
+    
+    /*
+    / 		участники мероприятия
+    */
     
     public function EventPerson($ids)
     {
@@ -85,6 +191,9 @@ class Catalog extends CommonLDC
 		}
     }
 
+    /*
+    /	 эксперты мероприятия
+    */
     
     public function EventExpert($ids)
     {
@@ -99,7 +208,7 @@ class Catalog extends CommonLDC
 						if($per['idPerson'] == $res['id']) {
 							$tempArray['image'] = $res['photo'];
 							$tempArray['info'] = $res['descr'];
-							$tempArray['name'] = $res['name'];
+							$tempArray['name'] = $res['surname'];
 						} 
 					}
 				} else {
@@ -117,6 +226,10 @@ class Catalog extends CommonLDC
 			return $list = [];
 		}
     }
+    
+    /*
+    /	 сотрудники компании
+    */
     
     public function CompanyPerson($ids)
     {
@@ -151,6 +264,10 @@ class Catalog extends CommonLDC
 		//return $ids ;
     }
     
+    /*
+    / 	мои компании
+    */
+    
     public function MyCompany($ids)
     {
  		$listCompany = Person::findOne($ids); 
@@ -160,11 +277,11 @@ class Catalog extends CommonLDC
 				$tempArray = [];
 				$tempArray['id'] = $per['company_id'];
 				$tempArray['image'] = $per['company_logo'];
-				$tempArray['info'] = '';
+				$tempArray['info'] = $per['company_anons'];
 				$tempArray['name'] = $per['company_name'];
 				$tempArray['date'] = 0;
 				$tempArray['hint'] = '';
-				$tempArray['kind'] = '';
+				$tempArray['kind'] = 'my/company';
 				$list[] = $tempArray;
 			}
 			return $list;
@@ -173,6 +290,10 @@ class Catalog extends CommonLDC
 		}
     }
 
+    /*
+    / мои знакомые персоны (те которых я добавил в свой список)
+    */
+    
     public function MyPerson($ids)
     {
 		$listPerosn = TrustedUsers::find()->where(['idPerson' => $ids])->orWhere(['idPersonTrust' => $ids])->andWhere(['access' => 2])->all();
@@ -201,5 +322,26 @@ class Catalog extends CommonLDC
 		} else {
 			return $list= [];
 		}
+    }
+    
+     private function companys($personInfo) 
+    {
+		$comp = '';
+ 			foreach ($personInfo->companyid as $person) {
+					$info = [];
+					$tempArray = [];
+ 					foreach($personInfo->companys as $company) {
+						if ($person['company_id'] == $company['company_id']) {
+							$info[0] = Clearstr::clear($company['company_name']);
+							$info[2] = Clearstr::clear($company['company_anons']);
+						}
+ 					}
+ 					$info[1] = Clearstr::clear($person['position']);
+ 					ksort($info); 
+ 					$comp .= implode("\n", $info)."\n";
+		
+ 			}
+			return $comp;	
+		
     }
 }

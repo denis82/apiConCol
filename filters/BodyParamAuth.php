@@ -52,12 +52,8 @@ class BodyParamAuth extends AuthMethod
     {	
 		$cookies = Yii::$app->request->cookies;
 		$authHeader = $cookies->getValue('token', 'en');
-		//$authHeader = 'Bearer GFrzFk48Rzxz6sqr-TK6zk6y3thZk5vq';
-
-        //$authHeader = $request->getCookies()->value;
-        //var_dump($authHeader);die();
+		
         if ($authHeader !== null && preg_match('/^Bearer\s+(.*?)$/', $authHeader, $matches)) {
-			
             $identity = $user->loginByAccessToken($matches[1], get_class($this));
             
             if ($identity === null) {
@@ -66,7 +62,6 @@ class BodyParamAuth extends AuthMethod
 				
 				$lastLoginTime = new DateTime($user->getIdentity()->lastLoginTime);
 				$lastLoginTime->add(new DateInterval('P'.$this->lifeTimeToken.'D'));
-
 				$currentDate = new DateTime(date('Y-m-d'));
 				$currentDate->add(new DateInterval('P'.$this->TimeToChangeToken.'D'));
 				
@@ -85,12 +80,10 @@ class BodyParamAuth extends AuthMethod
 							'value' => 'Bearer '.$generateToken,
 						]));
 					}
-					
 				} 
             }
             return $identity;
         }
-
         return null;
     }
 

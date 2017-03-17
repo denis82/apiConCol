@@ -2,8 +2,6 @@
 
 namespace app\models;
 
-//use Yii;
-
 use yii\db\ActiveRecord;
 
 class Groupgallery extends ActiveRecord 
@@ -13,8 +11,6 @@ class Groupgallery extends ActiveRecord
 	{
 		return "gallery_gr" ;
 	}
-	
-	
 
     public function getEvents()
     {

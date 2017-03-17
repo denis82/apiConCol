@@ -64,10 +64,13 @@ $config = [
                         
                     ],
                 ],*/
-                'list' => 'list/listindex',
-                'catalog' => 'catalog/catalogindex',
-                'data' => 'data/dataindex',
-                '<controller>' => '<controller>/index',
+//                 'list' => 'list/listindex',
+//                 'catalog' => 'catalog/catalogindex',
+//                 'data' => 'data/dataindex',
+//                 'album' => 'album/albumindex',
+				'<controller>' => '<controller>/index',
+                //'<controller>' => '<controller>/<controller>',
+                
                 '<controller>/<category>/<action><suffix:[/]{0,1}>' => '<controller>/<category><action>',
                 '<controller>/<category1>/<category2>/<action><suffix:[/]{0,1}>' => '<controller>/<category1><category2><action>',
                 //'<controller>/<category>/<action>' =>'<controller>/<action>',
@@ -112,7 +115,21 @@ $config = [
         ],
        ],
        
-       
+		'authClientCollection' => [
+				'class' => 'yii\authclient\Collection',
+				'clients' => [
+					'google' => [
+						'class' => 'yii\authclient\clients\GoogleOAuth',
+						'clientId' => 'google_client_id',
+						'clientSecret' => 'google_client_secret',
+					],
+					'twitter' => [
+						'class' => 'yii\authclient\clients\Twitter',
+						'consumerKey' => 'twitter_consumer_key',
+						'consumerSecret' => 'twitter_consumer_secret',
+					],
+				],
+		],
         
     ],
     'modules' => [

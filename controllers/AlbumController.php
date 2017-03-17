@@ -22,26 +22,38 @@ class AlbumController extends MainapiController
 	/				image - [String] картинка альбома.
 	/				]
 	*/			
+
+	public function init(){
+	   parent::init();
+	   $this->optionalActions = ['index','labels','labelme','labelperson','labelunknown','labelremove','labelmeremove'];
+	}
+	
 	
 	public function actionIndex()
     {
 		
- 		$idAlbum = Yii::$app->request->post('id');
+ 		$idAlbum = Yii::$app->request->post('ids');
  		$idAlbum = $this->simpleArray($idAlbum);
   		$modelGroupgallery = GroupGallery::findAll($idAlbum);
+  		$tempIndex = [];
+  		
  		if($modelGroupgallery) {
+
 			foreach ($modelGroupgallery as  $group) {
-				$this->tempArray['id'] = $group->gallery_gr_id;
-				$this->tempArray['event_id'] = $group->events[0]['event_id'];
+				$tempIndex['id'] = $group->gallery_gr_id;
+				$tempIndex['event_id'] = $group->events[0]['event_id'];
+				
 				foreach ($group->images as $image) {
 					$tempArray = [];
 					$tempArray['id'] = $image->gallery_id;
 					$tempArray['image'] = Yii::getAlias('@imgHost/zBoxuersk/gallery/'.$image->gallery_image);
-					$this->tempArray['images'][] = $tempArray;
+					$tempIndex['images'][] = $tempArray;
 				}
-				$this->tempArray['sub_events_albums'] = [];
+				$tempIndex['sub_events_albums'] = [];
+				$this->tempArray[] = $tempIndex;
 			}
  		}
+		
 		if(!empty($this->tempArray)) {$this->datas['success'] = true;}
 		$this->checkAuth();
 		$this->datas[self::DATAS] = $this->tempArray;
@@ -68,6 +80,7 @@ class AlbumController extends MainapiController
 		$idImage = Yii::$app->request->post('id');
  		$idImage = $this->simpleArray($idImage);
  		$modelLabel = Label::findAll(['gallery_id' => $idImage]);
+ 		
  		if($modelGroupgallery) {
 			foreach($modelLabel as $img){
 				$tempArray = [];
@@ -82,6 +95,7 @@ class AlbumController extends MainapiController
 				$this->tempArray[] = $tempArray;
 			}
 		}	
+ 		
  		if(!empty($this->tempArray)) {$this->datas['success'] = true;}
 		$this->checkAuth();
 		$this->datas[self::DATAS] = $this->tempArray;
@@ -108,13 +122,16 @@ class AlbumController extends MainapiController
 		$modelLabel->attributes = $dataLabel;
 		$modelLabel->idPerson = Yii::$app->user->identity->getId();
 		$modelLabel->gallery_id = Yii::$app->request->post('id');
+		
 		if($modelLabel->validate()) {
+			
 			if($modelLabel->save()) {
 				$this->tempArray['id'] = $modelLabel->id;
 			}
 		} else {
 			$this->datas['errors'] = $modelLabel->errors;
 		} 
+ 		
  		if(!empty($this->tempArray)) {$this->datas['success'] = true;}
  		
 		$this->checkAuth();
@@ -142,15 +159,17 @@ class AlbumController extends MainapiController
 		$modelLabel = new Label(['scenario' => Label::SCENARIO_KNOWN_PERSON]);
 		$modelLabel->attributes = $dataLabel;
 		$modelLabel->gallery_id = Yii::$app->request->post('id');
+		
 		if($modelLabel->validate()) {
+			
 			if($modelLabel->save()) {
 				$this->tempArray['id'] = $modelLabel->id;
 			}
 		} else {
 			$this->datas['errors'] = $modelLabel->errors;
 		} 
-		if(!empty($this->tempArray)) {$this->datas['success'] = true;}
 		
+		if(!empty($this->tempArray)) {$this->datas['success'] = true;}
 		$this->checkAuth();
 		$this->datas[self::DATAS] = $this->tempArray;
 		return $this->datas;
@@ -175,13 +194,16 @@ class AlbumController extends MainapiController
 		$modelLabel = new Label(['scenario' => Label::SCENARIO_UNKNOWN_PERSON]);
 		$modelLabel->attributes = $dataLabel;
 		$modelLabel->gallery_id = Yii::$app->request->post('id');
+		
 		if($modelLabel->validate()) {
+			
 			if($modelLabel->save()) {
 				$this->tempArray['id'] = $modelLabel->id;
 			}
 		} else {
 			$this->datas['errors'] = $modelLabel->errors;
 		} 
+ 		
  		if(!empty($this->tempArray)) {$this->datas['success'] = true;}
 		$this->checkAuth();
 		$this->datas[self::DATAS] = $this->tempArray;

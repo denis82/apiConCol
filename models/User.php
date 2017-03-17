@@ -9,26 +9,9 @@ use yii\db\ActiveRecord;
 
 class User extends ActiveRecord implements IdentityInterface
 {
-// 	// логин пользователя
  	public $id;
-// 	
-// 	// пароль пользователя
-// 	public $password;
-// 	
-// 	// последний ip пользователя
-// 	public $lastLoginIp;
-// 	
-// 	// токен пользователя
-// 	public $access_token;
-// 	
-// 	// Время последнего входа пользователя
-// 	public $lastLoginTime;
-// 	
-// 	// дата создания пользователя
-// 	public $createdAt;
-// 	
-// 	// дата обновления пользователя
-// 	public $updatedAt;
+ 	//public $user_idPerson;
+
 	public function rules()
 	{
 		return [
@@ -46,7 +29,6 @@ class User extends ActiveRecord implements IdentityInterface
     
 	public function getPhonemaildatas()
     {
-		//var_dump($this->hasMany(Phonemaildata::className(), ['idPerson' => 'idPerson']));die;
         return $this->hasMany(Phonemaildata::className(), ['idUser' => 'id']);
     }
     
@@ -58,7 +40,6 @@ class User extends ActiveRecord implements IdentityInterface
 
 	public static function findIdentityByAccessToken($token, $type = null)
     {
-		//var_dump( $token);die();
         return self::findOne(['access_token' => $token]);
     }
     public static function findIdentity($id)
@@ -68,8 +49,7 @@ class User extends ActiveRecord implements IdentityInterface
     
     public function getId()
     {
-		//var_dump($this->idUser);die();
-		$this->id = $this->user_id;
+		$this->id = $this->user_idPerson;
 		return $this->id;
     }
     
@@ -82,18 +62,4 @@ class User extends ActiveRecord implements IdentityInterface
     {
     
     }
-    
-
-//     public static function getId()
-//     {
-// 		return $this->id;
-//     }
-	
-	
-	
-// 	public static function findIdentityByAccessToken($token, $type = null){
-// 		return self::findOne(['acces_token' => $token]);
-// 	}
-
-
 }

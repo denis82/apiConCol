@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use Yii;
 use yii\db\ActiveRecord;
 use app\models\Phonemaildata;
 use yii\data\ActiveDataProvider;
@@ -14,7 +15,6 @@ class Person extends ActiveRecord
 	
 	public function getPhonemaildatas()
     {
-		//var_dump($this->hasMany(Phonemaildata::className(), ['idPerson' => 'idPerson']));die;
         return $this->hasMany(Phonemaildata::className(), ['idPerson' => 'id']);
     }
 	
@@ -37,7 +37,7 @@ class Person extends ActiveRecord
 	
 	public function getCompanys()
     {
-        return $this->hasMany(Company::className(), ['company_id' => 'idCompany'])
+        return $this->hasMany(Company::className(), ['company_id' => 'company_id'])
             ->viaTable('a_companyPerson', ['idPerson' => 'id']);
     }
     
@@ -67,7 +67,7 @@ class Person extends ActiveRecord
 	{
 		return [
 		
-			[['middlename','surname','name'], 'string', 'length' => [2, 35]],
+			[['middlename','surname','firstname'], 'string', 'length' => [2, 35]],
 			[['city','country'], 'string', 'length' => [2]],
 			['photo','image','extensions' => 'png, jpg'],
 			[['middlename',], 'default', 'value' => ''],
@@ -87,7 +87,7 @@ class Person extends ActiveRecord
 	public function attributeLabels()
     {
         return [
-            'name' => 'Имя',
+            'firstname' => 'Имя',
             'surname' => 'Фамилия',
 			'middlename' => 'Отчество',
 			'city'=> 'Город',
@@ -108,6 +108,14 @@ class Person extends ActiveRecord
 		return $list;
 	}
 	
+	/*
+	/	возвращает список персон доступных для отправки визитки
+	/	вход		[int] $idUser - ид пользователя отправляющего визитку
+	/				[array] $ids - ид пользователей которым отправляется визитка
+	/	выход		[array]  - ид пользователей кот. можно отправить визитку
+	/
+	*/
+	
 	public function listAccess($idUser, $ids)
     {
 		$users = self::findAll($ids);
@@ -123,111 +131,6 @@ class Person extends ActiveRecord
 			return $tempArray;
 		}
 	}
-	
-	
-	/*
-	/  возращает список Экспертов для пустого action
-	/
-	/
-	*/
-	public function catalogLP()
-	{
- 		$listObj = Expert::find()->groupBy('idPerson')->all();
-		if($listObj) {
-			$list = [];
-			foreach($listObj as $per) {
-				$tempArray = [];
-				$tempArray['id'] = $per['idPerson'];
-				$tempArray['image'] = (count($per->persons))?$per->persons[0]['photo']:'';
-				$tempArray['info'] = (count($per->persons))?$per->persons[0]['descr']:'';
-				$tempArray['name'] = (count($per->persons))?$per->persons[0]['name']:'';
- 				$tempArray['date'] = 0;
-				$tempArray['hint'] = '';
-				$tempArray['kind'] = '';
-				$list[] = $tempArray;
-			}
-			return $list;
-		} else {
-			return $list = [];
-		}
-	}
-	
-	/*
-	/  возращает список Событий для пустого action
-	/
-	/
-	*/
-	
-	public function catalogLE()
-	{
-	
-//==========================для битрикса========================================
-// 	$listObj = Eventb::find()->where(['IBLOCK_ID' => self::EVENT_IBLOCK])->all();
-// 	if($listObj) {
-// 			$list = [];
-// 			foreach($listObj as $per) {
-// 				$tempArray = [];
-// 				$tempArray['id'] = $per['ID'];
-// 				$tempArray['image'] = $per['PREVIEW_PICTURE'];
-// 				$tempArray['name'] = $per['NAME'];
-// 				$tempArray['info'] = $per['PREVIEW_TEXT'];
-//  				$tempArray['date'] = strtotime($per['DATE_CREATE']);
-// 				$tempArray['hint'] = '';
-// 				$tempArray['kind'] = '';
-// 				$list[] = $tempArray;
-// 			}
-// 			return $list;
-// 		} else {
-// 			return $list = [];
-// 		}
-//============================================================================
- 		$listObj = Event::find()->orderBy(['event_date' => SORT_DESC])->all();
-		if($listObj) {
-			$list = [];
-			foreach($listObj as $per) {
-				$tempArray = [];
-				$tempArray['id'] = $per['event_id'];
-				$tempArray['image'] = $per['event_image'];
-				$tempArray['name'] = $per['event_name'];
-				$tempArray['info'] = $per['event_anons'];
- 				$tempArray['date'] = strtotime($per['event_date']);
-				$tempArray['hint'] = '';
-				$tempArray['kind'] = '';
-				$list[] = $tempArray;
-			}
-			return $list;
-		} else {
-			return $list = [];
-		}
-	}
-	
-	/*
-	/  возращает список Компаний для пустого action
-	/
-	/
-	*/
-	
-	public function catalogLC()
-	{
- 		$listObj = Company::find()->all();
-		if($listObj) {
-			$list = [];
-			foreach($listObj as $per) {
-				$tempArray = [];
-				$tempArray['id'] = $per['company_id'];
-				$tempArray['image'] = $per['company_logo'];
-				$tempArray['info'] = $per['company_anons'];
- 				$tempArray['date'] = 0;
-				$tempArray['hint'] = '';
-				$tempArray['kind'] = '';
-				$list[] = $tempArray;
-			}
-			return $list;
-		} else {
-			return $list = [];
-		}
-	}
-	
 	
 	
 	public function listLP($ids)

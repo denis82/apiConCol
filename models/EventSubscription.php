@@ -52,13 +52,14 @@ class EventSubscription extends ActiveRecord
 		$existFields = [];
 		$person = Person::findOne($idUser);
 		$events = Event::findAll($idEvents);
-		if(isset($person) and !empty($events)) { 
+		if (isset($person) and !empty($events)) { 
 			$access = (self::BANSTATUS == $person->status)? false : true;  
 			switch ($state) {
+			
 				case 'registration':  // ЕСЛИ ЗАРЕГИСТРИРОВАТЬСЯ=======================================================
-					if($access) {
+					if ($access) {
 						$resEvents = EventSubscription::find()->where(['idEvent' => $idEvents])->andWhere(['idUser' => $idUser])->all();
-						if(isset($resEvents)) { 				// если есть записи в базе то статус нужно обновлять
+						if (isset($resEvents)) { 				// если есть записи в базе то статус нужно обновлять
 							foreach($resEvents as $reaEvent) {
 								if (in_array($reaEvent->idEvent, $idEvents)) {
 										$existFields[] = $reaEvent->idEvent;
@@ -68,7 +69,6 @@ class EventSubscription extends ActiveRecord
 										} else {
 											$done = [];
 											$done['id'] = $reaEvent->idEvent;
-											//$done['idUser'] = $reaEvent->idUser;
 											$done['state'] = $reaEvent->state;
 											$activeEvents[] = $done;
 										}
@@ -76,7 +76,7 @@ class EventSubscription extends ActiveRecord
 							}
 						}	
 						$addTo = $this->cutArray($existFields,$idEvents);
-						if($this->updateDone and !empty($addTo)) {
+						if ($this->updateDone and !empty($addTo)) {
 
 							foreach($addTo as $id) {  // формирование массива 
 								$idArray[] = ['idUser' => $idUser,'idEvent' => $id,'state' => self::REGSTATUS];
@@ -91,8 +91,9 @@ class EventSubscription extends ActiveRecord
 						}	
 					}	
 					break;
+					
 				case 'unregistration':  // ЕСЛИ РАЗРЕГИСТРИРОВАТЬСЯ==================================================
-					if($access) {
+					if ($access) {
 						foreach($idEvents as $id) {  // формирование массива 
 							$idArray[] = ['idUser' => $idUser,'idEvent' => $id,'state' => self::UNREGSTATUS];
 						}

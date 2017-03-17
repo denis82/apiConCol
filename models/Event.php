@@ -2,8 +2,6 @@
 
 namespace app\models;
 
-//use Yii;
-
 use yii\db\ActiveRecord;
 
 class Event extends ActiveRecord 
@@ -37,7 +35,6 @@ class Event extends ActiveRecord
 	
 	 public static function tableName()
     {
-        //return "{{%event}}" ;
         return "event" ;
     }
 }

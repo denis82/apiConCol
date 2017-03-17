@@ -2,12 +2,25 @@
 
 namespace app\models;
 
+use Yii;
 use yii\base\Model;
 use yii\db\ActiveRecord;
 use app\models\Phonemaildata;
 
 class Listing extends CommonLDC
 {
+    
+    public function listLP($ids)
+	{
+		$listObj = Expert::find()->groupBy('idPerson')->all();
+		$tempArray = [];
+		if($listObj) {
+			foreach($listObj as $string) {
+					$tempArray[] = $string['idPerson'];
+			}
+		} 
+		return $tempArray;
+	}
     
 	public function PersonCompany($ids)
     {

@@ -3,8 +3,8 @@
 namespace app\models;
 
 use yii\base\Model;
-use yii\web\UploadedFile;
 use app\myclass\Image;
+use yii\web\UploadedFile;
 
 class UploadFile extends Model
 {

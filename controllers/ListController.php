@@ -37,6 +37,22 @@ use yii\base\DynamicModel;
 
 class ListController extends MainapiController
 {
+	/*
+	/	Предоставляет упорядоченный список идентификаторов элементов
+	/
+	/	вход		infotype - [String]  тип данных который хочу получить Person/Event/Company
+	/				action - [String] элемент данные которого хочу получить. Некоторые данные не требуют
+	/				ids - [Array[Int]] Идентификаторы элементов данные которых хотим получить. Указывается при наличии action (Если есть то всегда один элемент)
+	/	
+	/	выход		[Array]
+	/					id - [Integer] идентификатор
+	*/
+	
+	public function init(){
+		parent::init();
+		$this->optionalActions = ['index'];
+	}
+	
 	public function actionListindex()
     {
 		$tempArray = [];
@@ -48,7 +64,7 @@ class ListController extends MainapiController
 			
 			switch($infotype){
 				case 'expert':
-					$list = new Person;
+					$list = new Listing;
 					$this->tempArray = $list->listLP($ids);
 					break;
 				case 'event':
@@ -68,7 +84,9 @@ class ListController extends MainapiController
 			}			
 		} else {			// если action не пустой то выводим инфотипы в зависимости от action ids[]
 			$modelList = new Listing;
+			
 			if(in_array($infotype,['person','event','company'])) {
+				
 				if($ids) {
 					
 					$this->tempArray = $modelList->listOfSomething($action,$infotype,array_shift ($ids));
@@ -77,6 +95,7 @@ class ListController extends MainapiController
 						$access_token = Yii::$app->request->cookies->getValue('token', false);
 						$user = User::findOne(['access_token' => explode(' ',$access_token)[1]]);
 						$ids = [];
+						
 						if($user) {
 							$ids[] = $user->id;
 						}
@@ -85,6 +104,7 @@ class ListController extends MainapiController
 				}
 			}
 		}
+		
 		if(!empty($this->tempArray)) {$this->datas['success'] = true;}
 		$this->checkAuth();
 		$this->datas[self::DATAS] = $this->tempArray;

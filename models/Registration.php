@@ -31,60 +31,62 @@ class Registration extends Model
 			['name', 'string', 'length' => [2, 35]],
 			['middlename', 'string', 'length' => [2, 35]],
 			['surname', 'string', 'length' => [2, 35]],
-			[['company','work','phone'],'safe']
+			[['login','password','surname','name','company','work','phone'],'safe']
 		];
 	}
+	
 	 public function signup()
 	{
-		$user = new User();
-// 		$user->login = $this->login;
-// 		$user->password = Yii::$app->getSecurity()->generatePasswordHash($this->password);
-// 		$user->createdAt = date('Y-m-d');
-// 		$user->lastLoginTime = date('Y-m-d');
-// 		$user->lastLoginIp = ip2long($this->userIp);
-// 		$user->access_token = $this->token;
-		//$model->validate();
-		$user->user_login = $this->login;
-		$user->user_password = md5($this->password);
-		$user->user_firstname = $this->name;
-		$user->user_surname = $this->surname;
-		$user->user_comp = $this->company;
-		$user->user_job = $this->work;
-		$user->user_phone = $this->phone;
-		$user->access_token = $this->token;
-		if($user->validate()) {
-			if($user->save()) {
-
-				$person = new Person();
-				$person->id = $user->user_id;
-				$person->name = $this->name;
-				$person->middlename = $this->middlename;
-				$person->surname = $this->surname;
-				$person->save();
-				
-				$RegistDatas = ['company' => $this->company, 'work' => $this->work, 'phone' => $this->phone];
-				foreach($RegistDatas as $key => $kind) {
-					$phonemail = new Phonemaildata();
-					if('phone' == $key) {
-						$phonemail->group = 1;
-					}
-					$phonemail->idPerson = $user->user_id;
-					$phonemail->kind = $key;
-					$phonemail->info = $kind;
-					$phonemail->save();
+		
+		
+		$person = new Person();
+		//$person->id = $user->user_id;
+		$person->firstname = $this->name;
+		$person->middlename = $this->middlename;
+		$person->surname = $this->surname;
+		$person->save();
+		
+		$RegistDatas = ['company' => $this->company, 'work' => $this->work, 'phone' => $this->phone];
+		foreach($RegistDatas as $key => $kind) {
+			$phonemail = new Phonemaildata();
+			if('phone' == $key) {
+				$phonemail->group = 1;
+			}
+			$phonemail->idPerson = $person->id;
+			$phonemail->kind = $key;
+			$phonemail->info = $kind;
+			$phonemail->save();
+		}
+		
+		if($person->validate()) {
+			if($person->save()) {
+				$user = new User();
+				$user->user_login = $this->login;
+				$user->user_idPerson = $person->id;
+				$user->user_password = md5($this->password);
+				$user->user_firstname = $this->name;
+				$user->user_surname = $this->surname;
+				$user->user_comp = $this->company;
+				$user->user_job = $this->work;
+				$user->user_phone = $this->phone;
+				$user->access_token = $this->token;
+				if($user->validate())
+				{
+					$user->save();
+					return true;
 				}
-				return true;
+				
 			} else {
 				return false;
 			}
 		} else {
-			$this->errors = $user->errors;
+			$this->errors = $person->errors;
 		}
 	} 
 	
-// 	public function signupb()
+// 	 public function signup()
 // 	{
-// 		$user = new Userb();
+// 		$user = new User();
 // 		$user->user_login = $this->login;
 // 		$user->user_password = md5($this->password);
 // 		$user->user_firstname = $this->name;
@@ -97,8 +99,8 @@ class Registration extends Model
 // 			if($user->save()) {
 // 
 // 				$person = new Person();
-// 				$person->id = $user->id;
-// 				$person->name = $this->name;
+// 				$person->id = $user->user_id;
+// 				$person->firstname = $this->name;
 // 				$person->middlename = $this->middlename;
 // 				$person->surname = $this->surname;
 // 				$person->save();
@@ -109,7 +111,7 @@ class Registration extends Model
 // 					if('phone' == $key) {
 // 						$phonemail->group = 1;
 // 					}
-// 					$phonemail->idPerson = $user->id;
+// 					$phonemail->idPerson = $user->user_id;
 // 					$phonemail->kind = $key;
 // 					$phonemail->info = $kind;
 // 					$phonemail->save();
@@ -123,6 +125,7 @@ class Registration extends Model
 // 		}
 // 	} 
 	
+	
 	public function changePass()
 	{
 		$user = new User();
@@ -132,9 +135,10 @@ class Registration extends Model
 		$user->lastLoginTime = date('Y-m-d');
 		$user->lastLoginIp = ip2long($this->userIp);
 		$user->access_token = $this->token;
-		//var_dump($user); die();
 		$user->save();
 	}
+	
+	
 	public function attributeLabels()
     {
         return [
@@ -150,5 +154,4 @@ class Registration extends Model
 			'phone' => 'Телефон',
         ];
     }
-	//$this->attributeLabels(['work' => "Должность"]);
 }

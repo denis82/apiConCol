@@ -30,13 +30,58 @@ use yii\base\DynamicModel;
 
 class DataController extends MainapiController
 {  
-	public function actionDataindex()
+	
+	/*
+	/	Предоставляет полную информацию, которую хотим показать на странице	
+	/	вход 			infotype - [String]  тип данных который хочу получить Person/Event/Company
+	/					ids - [Array[Int]] - идентификатор конкретных элементов
+	/
+	/	выход			[Array]
+	/							id   - [Integer] идентификатор
+	/							name - [String] Название
+	/							info - [String] Описание
+	/							image - [String] Картинка для Preview
+	/							back - [String] Картинка для фона заголовка
+	/							title - [String] Текст заголовка окна
+	/							date - [UNIX Time][Optional] время начала [02.02.2017]
+	/							withDividers - [Boolean] true: Между элементами есть разделитель
+	/							fields - [Array[KindModel]]  все возможные поля для отображения разных типов
+	/							kind - [String] Тип отображаемых данных (Person/Event)
+	*/
+	public function init(){
+		parent::init();
+		$this->optionalActions = ['index'];
+	}	
+	
+// 	public function actionIndex()
+//     {	
+// 		$res = Person::find()->all();
+// 		$query = 'INSERT INTO `a_companyPerson` (idPerson,company_id,position) VALUES';
+// 		$string = '';
+// 		foreach($res as $r) {
+//  			if('' == $r['company_id']) {
+//  				continue;
+// 			}
+// 			if('' == $r['position']) {
+// 				continue;
+// 			}
+// 			$string .= '('.$r['id'].','.$r['company_id'].',"'.$r['position'].'"),';
+// 			
+// 			
+// 		}
+// 		echo $query. $string;
+// // 		$query = 'SELECT ';
+// // 						INSERT INTO tbl_name (col1,col2) VALUES(15,col1*2)
+// // 			$resQuery = Yii::$app->db->createCommand($query)->queryAll();
+// 	}
+	
+	public function actionIndex()
     {
-    
 		$tempArray = [];
 		$infotype = Yii::$app->request->post(self::INFOTYPE);
 		$ids = $this->simpleArray(Yii::$app->request->post(self::IDS));
-		if($ids or $infotype == 'my') {
+		
+		if($ids or $infotype == 'my' or $infotype == 'about') {
 			$modelData = new Data;
 			switch($infotype){
 				case 'expert':
@@ -46,7 +91,6 @@ class DataController extends MainapiController
 					$this->tempArray = $modelData->dataListEvent($ids,$infotype); // список событий  dataListEvent
 					break;
 				case 'company':
-					
 					$this->tempArray = $modelData->dataListCompany($ids,$infotype); // список компаний  dataListCompany
 					break;
 				case 'about':
@@ -60,15 +104,17 @@ class DataController extends MainapiController
 					break;
 				case 'my':
 					$ids = [];
+					
 					if(!$idUser = Yii::$app->user->isGuest){
 						$ids[] = Yii::$app->user->identity->getId();
 					} 
 					$this->tempArray = $modelData->dataListPerson($ids,$infotype); // мой список   dataListMy
 					break;
 				default:
+					
 					break;	
 			}		
-		}	
+		}
 
 		if(!empty($this->tempArray)) {$this->datas['success'] = true;}
 		$this->checkAuth();

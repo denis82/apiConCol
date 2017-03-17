@@ -4,17 +4,101 @@ namespace app\models;
 
 use Yii;
 use yii\db\ActiveRecord;
-use app\models\Phonemaildata;
 use yii\helpers\ArrayHelper;
+use app\models\Phonemaildata;
+use app\myclass\Clearstr;
 
 class Data extends CommonLDC
 {   
 	public $tempArray = [];
 	public $getImgPath;
 
-	public function dataListAbout($ids,$infotype = false)
+	public function dataListAbout()
 	{
+		$about =
+		[
+			"title" =>  "О Конгресс-коллегии",
+			"image" =>  "about.png",
+			"kind" =>  "about",
+			"name" =>  "Конгресс-Коллегия",
+			"id" => 1,
+			"withDividers" => false,
+			"fields" => [
+						[
+							"type" =>  "text",
+							"name" =>  "",
+							"info" =>  "Бизнес-сообщество",
+							"style" =>  "center"
+						],
+						[
+							"type" =>  "group",
+							"name" =>  "",
+							"style" =>  "empty",
+							"withDividers" => true,
+							"fields" => [
+								[
+								"type" =>  "phone_email",
+								"name" =>  "",
+								"info" =>  "www.con-col.com",
+								"kind" =>  "site"
+								],
+								[
+								"type" =>  "phone_email",
+								"name" =>  "",
+								"info" =>  "+7 (909) 955-92-30",
+								"kind" =>  "phone"
+								],
+								[
+								"type" =>  "phone_email",
+								"name" =>  "",
+								"info" =>  "info@con-col.com",
+								"kind" =>  "email"
+								]
+							]
+						],
+						[
+							"type" =>  "separator",
+							"name" =>  "",
+							"style" =>  "small"
+						],
+						[
+							"type" =>  "text",
+							"name" =>  "Инициатры создания:",
+							"info" =>  "Группа физических лиц, заинтересованных в создании площадки для эффективного решения своих индивидуальных и коллегиальных задач."
+						],
+						[
+							"type" =>  "text",
+							"name" =>  "Основная цель:",
+							"info" =>  "«Конгресс-коллегия» призвана объединить представителей делового мира, культуры и науки, по-литиков и общественных деятелей, разделяющих общие гуманитарные ценности и реализующих инди-видуальные и коллегиальные деловые и общественно-значимые задачи."
+						],
+						[
+							"type" =>  "text",
+							"name" =>  "Первоочередными задачами «Конгресс-коллегии» являются:",
+							"info" =>  "ормирование заинтересованной консолидированной Аудитории;",
+							"style" =>  "hyphen"
+						],
+						[
+							"type" =>  "text",
+							"name" =>  "",
+							"info" =>  "организация востребованных членами сообщества мероприятий, разнообразных по форме и тематике;",
+							"style" =>  "hyphen"
+						],
+						[
+							"type" =>  "text",
+							"name" =>  "",
+							"info" =>  "реализация совместных коммерческих и гуманитарных проектов, инициированных членами сообщества;",
+							"style" =>  "hyphen"
+						],
+						[
+							"type" =>  "text",
+							"name" =>  "",
+							"info" =>  "обеспечение каждому члену сообщества возможности представления своих интересов и инициатив.",
+							"style" =>  "hyphen"
+						]
+			]
+		];
 		
+		return $about;
 	}
 	
 	public function dataListCompany($ids,$infotype)
@@ -38,7 +122,7 @@ class Data extends CommonLDC
 			foreach($company->persons as $person) {
 					$listPer = [];
 					$listPer['type'] = "info";
-					$listPer['name'] = $person['surname'] . ' '.$person['name'];
+					$listPer['name'] = $person['surname'] . ' '.$person['firstname'];
 					$listPer['info'] = $person['descr'];
 					$listPer['image'] = Yii::getAlias('@imgHost/images/person/'. $person['photo']);
 					$listPer['kind'] = "data/person";
@@ -48,8 +132,8 @@ class Data extends CommonLDC
 			}
 			$list['fields'] = 	[
 									[
-										"type" => "info",
-										"name" => $company['company_name'],
+										"type" => "text",
+										//"name" => $company['company_name'],
 										"info" => $company['company_anons'],
 										"id" => 0
 									],
@@ -88,7 +172,7 @@ class Data extends CommonLDC
 			$list['info'] = '';
 			$list['id'] = $event['event_id'];
 			$list['date'] = strtotime($event['event_date']);
-			$list['name'] = $event['event_name'];
+			$list['name'] = str_replace( "­", "", $event['event_name']);
 			
 			$list['withDividers'] = false;//true; // если false то сепаратор есть на картинке 
 			$tmpImg = array_slice(ArrayHelper::getColumn($event->galleries, 'gallery_image'), 0, 3);
@@ -105,8 +189,28 @@ class Data extends CommonLDC
 			if($event['event_date']<date('Y-m-d')) {
 				$button = [];
 			}
+			
+			/*if() {
+				$arrEvent1 = [	'type' => 'group',
+											'name' => '',
+											'style' => 'head',
+											"id" => $event['gallery_gr_id'],
+											'fields' =>  $button
+	// 														[
+	// 															'type' => 'info',
+	// 															
+	// 															//'info' => 'г. Москва, Якиманский переулок, дом 6, Бизнес-центр \"Имперский дом\"',
+	// 															'kind' => 'map\/:г. Москва',
+	// 															'id' => 0
+	// 														]
+														
+							];
+			}	*/		
+			$event_detail_text = str_replace( "­", "",$event['event_detail_text']);
+			$event_detail_text = str_replace("&shy;", '',$event_detail_text);
 			$list['fields'] = [
-									[	'type' => 'group',
+									[	
+										'type' => 'group',
 										'name' => '',
 										'style' => 'head',
 										"id" => $event['gallery_gr_id'],
@@ -127,19 +231,19 @@ class Data extends CommonLDC
 									
 									[	'type' => 'text',
 										'name' => '', 
-										'info' => $event['event_detail_text'],
+										'info' => $event_detail_text,//str_replace("&shy;", '',$event['event_detail_text']),
 										"id" => $event['gallery_gr_id']
 									],
 									
-									[
-										'type' => 'separator',
-									],
+// 									[
+// 										'type' => 'separator',
+// 									],
 									
-									[	'type' => 'next',
-										'name' => 'Расписание', 
-										'kind' => 'page/timeline\/4369\/4370',
-										"id" => $event['gallery_gr_id']
-									],
+// 									[	'type' => 'next',
+// 										'name' => 'Расписание', 
+// 										'kind' => 'page/timeline\/4369\/4370',
+// 										"id" => $event['gallery_gr_id']
+// 									],
 									
 									
 									[
@@ -167,6 +271,7 @@ class Data extends CommonLDC
 									
 									
 								   ];
+			
 			$this->tempArray[] = $list;
 		}
 		return $this->tempArray;
@@ -176,58 +281,68 @@ class Data extends CommonLDC
     {
 		$arExpert = [];
 		$arPhoto = [];
- 		$modelPerson = Person::findAll($ids);
+ 		$modelPerson = Person::find()->with(['companys', 'phonemaildatas','companyid'])
+									->where(['id' => $ids])
+									->all();
  		foreach($modelPerson as $person) {
  			$list = [];
  			$listEvent = [];
- 			$list['title'] = $person['surname'].' '.$person['name'].' '.$person['middlename'];
+ 			$list['title'] = $person['surname'].' '.$person['firstname'].' '.$person['middlename'];
  			if ('expert' == $infotype) {
 				$list['title'] = 'Эксперт';
 			}
- 			$list['image'] = Yii::getAlias('@imgHost/zBoxuersk/gallery/'.$person['photo']);
+			
+ 			$list['image'] = Yii::getAlias('@imgHost/zBoxuersk/position_author/'.$person['position_author_image']);
  			$list['back'] = Yii::getAlias('@imgHost/zBoxuersk/gallery/'.$person['photo']);
  			$list['kind'] = $infotype;
- 			$list['name'] = $person['surname'].' '.$person['name'].' '.$person['middlename'];
+ 			$list['name'] = $person['surname'].' '.$person['firstname'].' '.$person['middlename'];
  			$list['id'] = $person['id'];
  			$list['withDividers'] = true;
  			$arExpert = $this->experts($person->experts);
  			$arPhoto = $this->personphotos($person->personphotos);
- 			$list['fields'] = [
-								[
-									'type' => 'group',
-									'name' => '',
-									'style' => 'empty',
-									'id' => 0,
-									'fields' => [	
-													[
-													'type' => 'info',
-													'name' => 'Програмно-информационное сообщество лейся программа прямо в компьютер на каждом шагу',
-													'info' => 'Директор',
-													'image' => 'http:\/\/o-planete.ru\/wp-content\/uploads\/2013\/05\/%D1%8D%D1%82%D0%BD%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F-%D1%81%D1%82%D1%80%D1%83%D0%BA%D1%82%D1%83%D1%80%D0%B0-%D0%BD%D0%B0%D1%81%D0%B5%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F-.jpg',
-													'kind' => 'data/company',
-													'style' => 'round',
-													'id' => $person->companyid[0]["idCompany"],
-													]
-												]
-								],
-								[
-									'type' => 'text',
-									'name' => '',
-									'info' => 'Селитроваре лицеисту.\nФиллофорами обжалуешь фортификации откроил насурьмлённомся разопрелом олицетворить удаленькой измерительному оторопелым термофобах чаусы ссыпальщик препаровочную наростам бахчи.\nВымахивать полугодках водопольем отдерёмойся рвения меткости нездорового спазмолитическими проезжающим аппендикса.\nРубило сонетки перебрызганными неограниченности скидам побранивающимся расторговавшему хлорофосам.',
-									'id' => 0
-								],
-								$arExpert,
-								[
-									'type' => 'group',
-									'name' => 'Галерея',
-									'image' => Yii::getAlias('@imgHost/zBoxuersk/gallery/'.$person['photo']),
-									'kind' => 'album',
-									'style' => 'hnext',
-									'id' => $person['id'],
-									'fields' => $arPhoto,
-								]
-
- 						];
+ 			$arCompanys = $this->companys($person);
+ 			
+			$arComp = [];
+			$pers = [];
+			$exp = [];
+			$gallery = [];
+ 			
+ 			if($arCompanys) {
+				$arComp = [
+							'type' => 'group',
+							'name' => '',
+							'style' => 'empty',
+							'id' => 0,
+							'fields' => $arCompanys
+										
+						];
+ 			}
+ 			if($person['welcome']) {
+				$pers = [
+							'type' => 'text',
+							'name' => '',
+							'info' => $person['welcome'],
+							'id' => 0
+							];
+ 			}
+ 			if(!empty($arExpert)) {
+				$exp = [
+							'type' => 'group',
+							'fields' => $arExpert,
+						];
+ 			}
+ 			if($person['photo'] || !empty($arPhoto)) {
+				$gallery = [
+							'type' => 'group',
+							'name' => 'Галерея',
+							'image' => Yii::getAlias('@imgHost/zBoxuersk/gallery/'.$person['photo']),
+							//'kind' => 'album',
+							'style' => 'hnext',
+							'id' => $person['id'],
+							'fields' => $arPhoto,
+						];
+ 			}
+ 			$list['fields'] = [$arComp,$pers,$exp,$gallery];
  			$this->tempArray[] = $list;
  		}
  		return $this->tempArray;
@@ -246,7 +361,7 @@ class Data extends CommonLDC
 						if($per['idPerson'] == $res['id']) {
 							$tempArray['image'] = $res['photo'];
 							$tempArray['info'] = $res['descr'];
-							$tempArray['name'] = $res['name'];
+							$tempArray['name'] = $res['firstname'];
 						} 
 					}
 				} else {
@@ -286,8 +401,8 @@ class Data extends CommonLDC
 		foreach ($experts as $eventExpert) {
 			$listEvent = [] ;
 			$listEvent['type'] = 'event';
-			$listEvent['name'] = $eventExpert['event_name'];
-			$listEvent['kind'] = 'data\/event';
+			$listEvent['name'] = Clearstr::clear($eventExpert['event_name']);
+			$listEvent['kind'] = 'data/event';
 			$listEvent['hint'] = '';
 			$listEvent['place'] = '';
 			$listEvent['id'] = $eventExpert['event_id'];
@@ -297,19 +412,35 @@ class Data extends CommonLDC
 		return $arExpert;
  	}		
     
+    private function companys($personInfo) 
+    {
+		$comp = [];
+ 			foreach ($personInfo->companyid as $person) {
+					$info = [];
+					$tempArray = [];
+					$tempArray['type'] = 'info';
+ 					$tempArray['kind'] = 'data/company';
+ 					$tempArray['style'] = 'round';
+ 					foreach($personInfo->companys as $company) {
+						if ($person['company_id'] == $company['company_id']) {
+							$tempArray['id'] = $company['company_id'];
+							$tempArray['name'] = Clearstr::clear($company['company_name']);
+							$tempArray['image'] = Yii::getAlias('@imgHost/zBoxuersk/company/' . $company['company_image']);
+							$info[0] = $company['company_name'];
+							$info[2] = Clearstr::clear($company['company_anons']);
+						}
+ 					}
+ 					$info[1] = $person['position'];
+ 					ksort($info); 
+ 					$tempArray['info'] = '';//implode("\n", $info);
+ 					$comp[] = $tempArray;
+ 			}
+			return $comp;	
+		
+    }
+    
     public function getImagePath() 
     {
     
     }
 }
-
-//  id   - [Integer] идентификатор
-//  name - [String] Название
-//  info - [String] Описание
-//  image - [String] Картинка для Preview
-//  back - [String] Картинка для фона заголовка
-//  title - [String] Текст заголовка окна
-//  date - [UNIX Time][Optional] время начала [02.02.2017]
-//  withDividers - [Boolean] true: Между элементами есть разделитель
-//  fields - [Array[KindModel]]  все возможные поля для отображения разных типов
-//  kind - [String] Тип отображаемых данных (Person/Event)

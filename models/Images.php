@@ -2,8 +2,9 @@
 
 namespace app\models;
 
-use yii\base\ActiveRecord;
 use yii\web\UploadedFile;
+use yii\base\ActiveRecord;
+
 
 class UploadForm extends ActiveRecord
 

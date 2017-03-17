@@ -14,6 +14,7 @@ use yii\base\ErrorException;
  * @property User|null $user This property is read-only.
  *
  */
+ 
 class Login extends Model
 {
     public $login;
@@ -30,7 +31,7 @@ class Login extends Model
     /**
      * @return array the validation rules.
      */
-	 public function rules()
+	public function rules()
 	{
 		return [
 		
@@ -47,19 +48,6 @@ class Login extends Model
      * @param string $attribute the attribute currently being validated
      * @param array $params the additional name-value pairs given in the rule
      */
-//     public function validatePassword($attribute, $params)
-//     {
-// 
-//         if (!$this->hasErrors()) {
-//             $user = $this->getUser();
-//             
-//             if($user) {
-// 				if (!Yii::$app->getSecurity()->validatePassword($this->password, $user->password)){
-// 					$this->addError($attribute, 'Пароль не верный.');
-// 				}
-// 			}	
-//         }
-//     }
     
     public function valPassword($attribute, $params)
     {
@@ -146,7 +134,6 @@ class Login extends Model
 			$user = User::find()
 						->where(['access_token' => explode(' ',$token)[1]])
 						->one();
-			//return $user->access_token;
 			if(isset($user->access_token)) {
 				$user->access_token = '';
 				

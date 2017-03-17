@@ -7,9 +7,6 @@ use app\models\Phonemaildata;
 
 class Listing extends Model
 {
-
-
-
     
     /**
      * @return array the validation rules.
