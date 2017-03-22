@@ -57,76 +57,56 @@ class ProfileController extends MainapiController
     const THEMEALBUMEVENT= 'Event';
     const USERPERSON = 'userPerson';
     const THEMEALBUMPERSON = 'Person';
-	
-	/*  Регистрация пользователя
-	/	вход: пароль, логин
-	/	выход: success/error
-	*/
-	
-	
-	public function actionRegistration()
+    
+
+    /**
+    * Регистрация пользователя
+    * @param string   $login логин пользователя
+    * @param string   $password  пароль пользователя
+    * @param string   $surname  Фамилия
+    * @param string   $name  Имя
+    * @param string   $middlename  Отчество
+    * @param string   $company Компания
+    * @param string   $work Должность
+    * @param string   $phone Телефон
+    * @return boolean/errors 
+    */
+    
+    public function actionRegistration()
     {
         $generate = Yii::$app->security;
-        $model = new Registration();
-        $model->attributes = Yii::$app->request->post();
-        $model->token = $generate->generateRandomString();
-        if ($model->validate()) {
-            if($model->signup()) {
-                $this->datas['authorized'] = true;
-                $this->datas['success'] = true;
-            } else {
-                $this->datas['authorized'] = false;
-            }
-            $cookies = Yii::$app->response->cookies;
-            $cookies->add(new \yii\web\Cookie([
-                    'name' => 'token',
-                    'value' => 'Bearer '.$model->token,
-                ]));
-            
-        } else {
-            $this->datas['errors'] = $model->errors;
-        }
-        $this->datas['errors'] = $model->errors;
-        $this->datas[self::DATAS] = $this->tempArray;
+        $modelRegistration = new Registration();
+        $this->tempArray = $modelRegistration->regist();
+        $this->datas = ArrayHelper::merge($this->datas, $this->tempArray);
+        $this->datas[self::DATAS] = $this->datas;
         return $this->datas; 
     }
 
-    /*  Обновление пароля пользователя
-    /	вход: пароль,подтверждение пароля, логин
-    /	выход: success/error
+    /**
+    * Обновление пароля пользователя
+    * @param string   $newPassword  пароль пользователя
+    * @param string   $oldPassword  старый пароль
+    * @param string   $name  Имя
+    * @param string   $middlename  Отчество
+    * @return boolean/errors 
     */
 
     public function actionUpdatepassword()
     {
-        $UpdatepasswordModel = new Updatepassword();
-        $header = Yii::$app->request->cookies;
-        $authToken = $header->getValue('token', false);
-        $UpdatepasswordModel->token = $authToken;
-        $UpdatepasswordModel->password = Yii::$app->request->post('oldPassword');
-        $UpdatepasswordModel->newPassword = Yii::$app->request->post('newPassword');
-        
-        if ($UpdatepasswordModel->validate())
-        {
-            $this->datas['success'] = $UpdatepasswordModel->updatePassword();
-        } else {
-            $this->datas['errors'] = $UpdatepasswordModel->errors;
-        }
+        $UpdatepasswordModel = new Updatepassword();        
+        $this->tempArray = $UpdatepasswordModel->updatePassword();
+        $this->datas = ArrayHelper::merge($this->datas, $this->tempArray);
         $this->checkAuth();
-        $this->datas[self::DATAS] = $this->tempArray;
         return $this->datas;
     }
     
     /**
-     * Returns message file path for the specified language and category.
+     * Авторизация
      *
-     * @param string $language the target language
-     * @return string path to message file
+     * @param string $login логин
+     * @param string $password пароль
+     * @return boolean  - token($_COOKIE)
      */
-
-    /*  Авторизация
-    /	вход: пароль, логин
-    /	выход: токен 
-    */
 
     public function actionLogin()
     {
@@ -156,10 +136,12 @@ class ProfileController extends MainapiController
         return $this->datas;
     }
 
-    /*  Закрыть сессию авторизации
-    /	вход: -
-    /	выход: true
-    */
+
+    /**
+     * Закрыть сессию авторизации
+     * @param string - token($_COOKIE)
+     * @return boolean 
+     */
 
     public function actionLogout()
     {
@@ -178,47 +160,24 @@ class ProfileController extends MainapiController
         return $this->datas;
     }
 
-    /*  Проверяет зарегестрирован ли человек на событие и если да то на какие 
-    /	вход: 	ids - [Array[Integer]] идентификаторы событий 
-    /	выход:  state - [Integer]значение состояния регистрации
-    /			eventId- [Integer] идентификатор события
-    */
+    /**
+     *  Проверяет зарегестрирован ли человек на событие и если да то на какие 
+     *
+     * @param array $ids идентификаторы событий 
+     * @return array [
+     *                  integer $state - значение состояния регистрации
+     *                  Integer $eventId - идентификатор события
+     *                ]
+     */
 
     public function actionCheckeventregistration()
     {
         $idUser = Yii::$app->user->identity->getId();
         $tempIds = Yii::$app->request->post(self::IDS);
         $ids = $this->simpleArray($tempIds);
-        $tempArray = [];
-        if (!empty($ids)) {
-            $events = EventSubscription::findAll(['idUser' => $idUser,'idEvent' => $ids]);
-            if ($events) {
-                foreach ($events as $event) {
-                    $tempArray[] = $event->idEvent;
-                    $this->tempArray['id'] = $event->idEvent;
-                    $this->tempArray['state'] = $event->state;
-                    $this->datas[self::DATAS][] = $this->tempArray;
-                }
-                $rest = array_diff($ids, $tempArray);
-                foreach ($rest as $res) {
-                    $this->tempArray['id'] = $res;
-                    $this->tempArray['state'] = $this->stateDefault;
-                    $this->datas[self::DATAS][] = $this->tempArray;
-                }
-                $this->datas['success'] = $this->tempArray;
-            } else {
-                foreach($ids as $id) {
-                    $this->tempArray['id'] = $id;
-                    $this->tempArray['state'] = $this->stateDefault;
-                    $this->datas[self::DATAS][] = $this->tempArray;
-                }	
-            if(!empty($this->tempArray)) {
-                    $this->datas['success'] = true;
-                }
-            }
-        } else {
-            $this->datas[self::DATAS] = [];
-        }
+        $modelEvent = new Event();
+        $this->tempArray = $modelEvent->checkeventregistration($ids);
+        $this->datas = ArrayHelper::merge($this->datas, $this->tempArray);
         $this->checkAuth();
         return $this->datas;
     }

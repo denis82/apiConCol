@@ -3,8 +3,9 @@
 namespace app\models;
 
 use Yii;
-use app\models\User;
 use yii\base\Model;
+use app\models\User;
+use yii\base\Security;
 
 class Registration extends Model
 {
@@ -19,7 +20,11 @@ class Registration extends Model
 	public $work;
 	public $phone;
 	public $errors = [];
-	
+	/**
+    * @var array
+    */
+    public $dataResult = [];
+    
 	public function rules()
 	{
 		return [
@@ -35,9 +40,37 @@ class Registration extends Model
 		];
 	}
 	
+	public function regist()
+    {
+        $generate = Yii::$app->security;
+        $this->attributes = Yii::$app->request->post();
+        $this->token = $generate->generateRandomString();
+        if ($this->validate()) {
+            $rty = $this->signup();
+            if($rty) {
+                
+                $this->dataResult['authorized'] = true;
+                $this->dataResult['success'] = true;
+            } else {
+                $this->dataResult['authorized'] = false;
+            }
+            $cookies = Yii::$app->response->cookies;
+            $cookies->add(new \yii\web\Cookie([
+                    'name' => 'token',
+                    'value' => 'Bearer '.$this->token,
+                ]));
+            
+        } else {
+            $this->dataResult['errors'] = $this->errors;
+        }
+        $this->dataResult['errors'] = $this->errors;
+        $this->dataResult['x'] = $rty;
+        return $this->dataResult;
+    
+	}
 	 public function signup()
 	{
-		
+        
 		
 		$person = new Person();
 		//$person->id = $user->user_id;
@@ -74,14 +107,17 @@ class Registration extends Model
 				{
 					$user->save();
 					return true;
+				} else {
+                    return $user->errors;
 				}
-				
 			} else {
 				return false;
 			}
 		} else {
 			$this->errors = $person->errors;
+			return 1;
 		}
+		
 	} 
 	
 // 	 public function signup()

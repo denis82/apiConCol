@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @link http://www.con-col.com/
+ * @link http://www.con-col-lp.com/
  * @copyright Copyright (c) 2017 Picom
  */
 
@@ -11,9 +11,8 @@ use Yii;
 use yii\db\ActiveRecord;
 
 /**
- *
- * @author Telegin Denis <dtelegin.spok@yandex.ru>
- */
+* @author Telegin Denis <dtelegin.spok@yandex.ru>
+*/
 
 class Event extends ActiveRecord 
 {
@@ -23,7 +22,10 @@ class Event extends ActiveRecord
      * @var array
      */
     public $dataResult = [];
-    
+    /**
+     * @var int
+     */
+    public $stateDefault = 400;
         
     public function getEventSubscriptions()
     {
@@ -71,7 +73,7 @@ class Event extends ActiveRecord
             foreach ($events as $event) {
                 if (self::EVENT_UNREGIST == $event->state) {
                     $dataResult = $event->idEvent;
-                    if(!empty($this->tempArray)) {
+                    if(!empty($dataResult)) {
                         $this->dataResult['success'] = true;
                     }
                     $this->dataResult['datas'][] = $dataResult;
@@ -82,4 +84,43 @@ class Event extends ActiveRecord
         }
         return $this->dataResult; 
     } 
+    
+    
+    public function checkeventregistration($ids = [])
+    {
+        $idUser = Yii::$app->user->identity->getId();
+        $tempArray = [];
+        $arrEvent = [];
+        if (!empty($ids)) {
+            $events = EventSubscription::findAll(['idUser' => $idUser,'idEvent' => $ids]);
+            if ($events) {
+                foreach ($events as $event) {
+                    $tempArray[] = $event->idEvent;
+                    $arrEvent['id'] = $event->idEvent;
+                    $arrEvent['state'] = $event->state;
+                    $this->dataResult['datas'][] = $arrEvent;
+                }
+                $rest = array_diff($ids, $tempArray);
+                foreach ($rest as $res) {
+                    $arrEvent['id'] = $res;
+                    $arrEvent['state'] = $this->stateDefault;
+                    $this->dataResult['datas'][] = $arrEvent;
+                }
+                $this->dataResult['success'] = $arrEvent;
+            } else {
+                foreach($ids as $id) {
+                    $arrEvent['id'] = $id;
+                    $arrEvent['state'] = $this->stateDefault;
+                    $this->dataResult['datas'][] = $arrEvent;
+                }   
+                
+            }
+            if(!empty($arrEvent)) {
+                        $this->dataResult['success'] = true;
+            } 
+        } else {
+            $this->dataResult['datas'] = [];
+        }
+        return $this->dataResult;
+    }
 }

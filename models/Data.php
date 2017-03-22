@@ -78,201 +78,186 @@ class Data extends CommonLDC
 							"style" =>  "hyphen"
 						],
 						[
-							"type" =>  "text",
-							"name" =>  "",
-							"info" =>  "организация востребованных членами сообщества мероприятий, разнообразных по форме и тематике;",
-							"style" =>  "hyphen"
+                                                    "type" =>  "text",
+                                                    "name" =>  "",
+                                                    "info" =>  "организация востребованных членами сообщества мероприятий, разнообразных по форме и тематике;",
+                                                    "style" =>  "hyphen"
 						],
 						[
-							"type" =>  "text",
-							"name" =>  "",
-							"info" =>  "реализация совместных коммерческих и гуманитарных проектов, инициированных членами сообщества;",
-							"style" =>  "hyphen"
+                                                    "type" =>  "text",
+                                                    "name" =>  "",
+                                                    "info" =>  "реализация совместных коммерческих и гуманитарных проектов, инициированных членами сообщества;",
+                                                    "style" =>  "hyphen"
 						],
 						[
-							"type" =>  "text",
-							"name" =>  "",
-							"info" =>  "обеспечение каждому члену сообщества возможности представления своих интересов и инициатив.",
-							"style" =>  "hyphen"
+                                                    "type" =>  "text",
+                                                    "name" =>  "",
+                                                    "info" =>  "обеспечение каждому члену сообщества возможности представления своих интересов и инициатив.",
+                                                    "style" =>  "hyphen"
 						]
 			]
 		];
 		
-		return $about;
+	return $about;
 	}
 	
-	public function dataListCompany($ids,$infotype)
+    public function dataListCompany($ids,$infotype)
     {
-		$modelCompany = Company::findAll($ids);
- 		$serverName = Yii::$app->request->serverName;
- 		$fullPath = $_SERVER['DOCUMENT_ROOT'];
- 		$this->getImgPath = str_replace($serverName, "", $fullPath).Yii::$app->params['pathToFolderPersonInWebSite'];
-		foreach($modelCompany as $company) {
-			$list = [];
-			$listPer = [];
-			$fieldsPer = [];
-			$list['kind'] = $infotype;
-			$list['title'] = $company['company_name'];
-			$list['info'] = $company['company_anons'];
-			$list['id'] = $company['company_id'];
-			//$list['back'] = "http:\/\/s.androidinsider.ru\/2016\/10\/android.@750.png";
-			$list['name'] = $company['company_name'];
-			$list['withDividers'] = false;
-			$list['image'] = Yii::getAlias('@imgHost/images/company/'. $company['company_image']);
-			foreach($company->persons as $person) {
-					$listPer = [];
-					$listPer['type'] = "info";
-					$listPer['name'] = $person['surname'] . ' '.$person['firstname'];
-					$listPer['info'] = $person['descr'];
-					$listPer['image'] = Yii::getAlias('@imgHost/images/person/'. $person['photo']);
-					$listPer['kind'] = "data/person";
-					$listPer['style'] = "round";
-					$listPer['id'] = $person['id'];
-					$fieldsPer[] = $listPer;
-			}
-			$list['fields'] = 	[
-									[
-										"type" => "text",
-										//"name" => $company['company_name'],
-										"info" => $company['company_anons'],
-										"id" => 0
-									],
-									[
-										"type" => "group",
-										"name" => "",
-										"style" => "empty",
-										"id" => 0,
-										"withDividers" => true,
-										"fields" => 	$fieldsPer
-										
-									]
-									
-								];
-								   
-			$this->tempArray[] = $list;
-		}
-		return $this->tempArray;
+        $modelCompany = Company::findAll($ids);
+        $serverName = Yii::$app->request->serverName;
+        $fullPath = $_SERVER['DOCUMENT_ROOT'];
+        $this->getImgPath = str_replace($serverName, "", $fullPath).Yii::$app->params['pathToFolderPersonInWebSite'];
+        foreach($modelCompany as $company) {
+            $list = [];
+            $listPer = [];
+            $fieldsPer = [];
+            $list['kind'] = $infotype;
+            $list['title'] = $company['company_name'];
+            $list['info'] = $company['company_anons'];
+            $list['id'] = $company['company_id'];
+            //$list['back'] = "http:\/\/s.androidinsider.ru\/2016\/10\/android.@750.png";
+            $list['name'] = $company['company_name'];
+            $list['withDividers'] = false;
+            $list['image'] = Yii::getAlias('@imgHost/images/company/'. $company['company_image']);
+            foreach($company->persons as $person) {
+                $listPer = [];
+                $listPer['type'] = "info";
+                $listPer['name'] = $person['surname'] . ' '.$person['firstname'];
+                $listPer['info'] = $person['descr'];
+                $listPer['image'] = Yii::getAlias('@imgHost/images/person/'. $person['photo']);
+                $listPer['kind'] = "data/person";
+                $listPer['style'] = "round";
+                $listPer['id'] = $person['id'];
+                $fieldsPer[] = $listPer;
+            }
+            $list['fields'] = 	[
+                                        [
+                                            "type" => "text",
+                                            //"name" => $company['company_name'],
+                                            "info" => $company['company_anons'],
+                                            "id" => 0
+                                        ],
+                                        [
+                                            "type" => "group",
+                                            "name" => "",
+                                            "style" => "empty",
+                                            "id" => 0,
+                                            "withDividers" => true,
+                                            "fields" => 	$fieldsPer
+
+                                        ]
+
+                                    ];
+
+            $this->tempArray[] = $list;
+        }
+	return $this->tempArray;
     }
 	
 	public function dataListEvent($ids,$infotype)
 	{
 		$modelEvent = Event::findAll($ids);
-		$button = 	[
-						'type' => 'button',
-						'name' => 'Registration2',
-						'kind' => 'registration',
-						'id' => 0
-					];
+            $button = 	[
+                                'type' => 'button',
+                                'name' => 'Registration2',
+                                'kind' => 'registration',
+                                'id' => 0
+                            ];
 		foreach($modelEvent as $event) {
-			$list = [];
-			$listImg = [];
-			$fieldsImg = [];
-			$list['kind'] = $infotype;
-			$list['title'] = 'Мероприятие';
-			$list['info'] = '';
-			$list['id'] = $event['event_id'];
-			$list['date'] = strtotime($event['event_date']);
-			$list['name'] = str_replace( "­", "", $event['event_name']);
-			
-			$list['withDividers'] = false;//true; // если false то сепаратор есть на картинке 
-			$tmpImg = array_slice(ArrayHelper::getColumn($event->galleries, 'gallery_image'), 0, 3);
-			foreach($event->galleries as $img) {
-				$listImg['type'] = 'info';
-				$listImg['id'] = $img['gallery_id'];
-				$listImg['image'] = Yii::getAlias('@imgHost/zBoxuersk/gallery/'.$img['gallery_image']);
-				$listImg['kind'] = 'photo/'.Yii::getAlias('@imgHost/zBoxuersk/gallery/'.$img['gallery_image']);
-				$listImg['style'] = 'rect';
-				$fieldsImg[] = $listImg;
-			}
-			$fieldsImg = array_slice($fieldsImg, 0, 3);
-			$list['image'] = $listImg;
-			if($event['event_date']<date('Y-m-d')) {
-				$button = [];
-			}
-			
-			/*if() {
-				$arrEvent1 = [	'type' => 'group',
-											'name' => '',
-											'style' => 'head',
-											"id" => $event['gallery_gr_id'],
-											'fields' =>  $button
-	// 														[
-	// 															'type' => 'info',
-	// 															
-	// 															//'info' => 'г. Москва, Якиманский переулок, дом 6, Бизнес-центр \"Имперский дом\"',
-	// 															'kind' => 'map\/:г. Москва',
-	// 															'id' => 0
-	// 														]
-														
-							];
-			}	*/		
-			$event_detail_text = str_replace( "­", "",$event['event_detail_text']);
-			$event_detail_text = str_replace("&shy;", '',$event_detail_text);
-			$list['fields'] = [
-									[	
-										'type' => 'group',
-										'name' => '',
-										'style' => 'head',
-										"id" => $event['gallery_gr_id'],
-										'fields' =>  $button
-// 														[
-// 															'type' => 'info',
-// 															
-// 															//'info' => 'г. Москва, Якиманский переулок, дом 6, Бизнес-центр \"Имперский дом\"',
-// 															'kind' => 'map\/:г. Москва',
-// 															'id' => 0
-// 														]
-													
-									],
-									
-									[
-										'type' => 'separator',
-									],
-									
-									[	'type' => 'text',
-										'name' => '', 
-										'info' => $event_detail_text,//str_replace("&shy;", '',$event['event_detail_text']),
-										"id" => $event['gallery_gr_id']
-									],
-									
+                    $list = [];
+                    $listImg = [];
+                    $fieldsImg = [];
+                    $list['kind'] = $infotype;
+                    $list['title'] = 'Мероприятие';
+                    $list['info'] = '';
+                    $list['id'] = $event['event_id'];
+                    $list['date'] = strtotime($event['event_date']);
+                    $list['name'] = str_replace( "­", "", $event['event_name']);
+
+                    $list['withDividers'] = false;//true; // если false то сепаратор есть на картинке 
+                    $tmpImg = array_slice(ArrayHelper::getColumn($event->galleries, 'gallery_image'), 0, 3);
+                    foreach($event->galleries as $img) {
+                        $listImg['type'] = 'info';
+                        $listImg['id'] = $img['gallery_id'];
+                        $listImg['image'] = Yii::getAlias('@imgHost/zBoxuersk/gallery/'.$img['gallery_image']);
+                        $listImg['kind'] = 'photo/'.Yii::getAlias('@imgHost/zBoxuersk/gallery/'.$img['gallery_image']);
+                        $listImg['style'] = 'rect';
+                        $fieldsImg[] = $listImg;
+                    }
+                    $fieldsImg = array_slice($fieldsImg, 0, 3);
+                    $list['image'] = $listImg;
+                    if($event['event_date']<date('Y-m-d')) {
+                        $button = [];
+                    }
+		
+                    $event_detail_text = str_replace( "­", "",$event['event_detail_text']);
+                    $event_detail_text = str_replace("&shy;", '',$event_detail_text);
+                    $list['fields'] = [
+                                        [	
+                                            'type' => 'group',
+                                            'name' => '',
+                                            'style' => 'head',
+                                            "id" => $event['gallery_gr_id'],
+                                            'fields' =>  $button
+//                                      [
+//                                         type' => 'info',
+// 												
+//                                         info' => 'г. Москва, Якиманский переулок, дом 6, Бизнес-центр \"Имперский дом\"',
+//                                         kind' => 'map\/:г. Москва',
+//                                         id' => 0
+// 					]
+
+                                        ],
+
+                                        [
+                                            'type' => 'separator',
+                                        ],
+
+                                        [	'type' => 'text',
+                                            'name' => '', 
+                                            'info' => $event_detail_text,//str_replace("&shy;", '',$event['event_detail_text']),
+                                            "id" => $event['gallery_gr_id']
+                                        ],
+
 // 									[
 // 										'type' => 'separator',
 // 									],
-									
+
 // 									[	'type' => 'next',
 // 										'name' => 'Расписание', 
 // 										'kind' => 'page/timeline\/4369\/4370',
 // 										"id" => $event['gallery_gr_id']
 // 									],
-									
-									
-									[
-										'type' => 'separator',
-									],
-									
-									[	'type' => 'next',
-										'name' => 'Материалы', 
-										'kind' => 'data/resource',
-										"id" => $event['event_id']
-									],
-									
-									[
-										'type' => 'separator',
-									],
-									[
-										'type' => 'group',
-										'name' => 'Галерея',
-										'image' => 'http:\/\/s.androidinsider.ru\/2016\/11\/12Sea.@750.jpg',
-										'kind' => 'album',
-										'style' => 'hnext',
-										'id' => $event['gallery_gr_id'], // id_album
-										'fields' => $fieldsImg
-									],
-									
-									
-								   ];
-			
-			$this->tempArray[] = $list;
+
+
+                                        [
+                                            'type' => 'separator',
+                                        ],
+
+                                        [	
+                                            'type' => 'next',
+                                            'name' => 'Материалы', 
+                                            'kind' => 'data/resource',
+                                            "id" => $event['event_id']
+                                        ],
+
+                                        [
+                                            'type' => 'separator',
+                                        ],
+                                        [
+                                            'type' => 'group',
+                                            'name' => 'Галерея',
+                                            'image' => 'http:\/\/s.androidinsider.ru\/2016\/11\/12Sea.@750.jpg',
+                                            'kind' => 'album',
+                                            'style' => 'hnext',
+                                            'id' => $event['gallery_gr_id'], // id_album
+                                            'fields' => $fieldsImg
+                                        ],
+
+
+                        ];
+
+                    $this->tempArray[] = $list;
 		}
 		return $this->tempArray;
 	}
@@ -282,8 +267,8 @@ class Data extends CommonLDC
 		$arExpert = [];
 		$arPhoto = [];
  		$modelPerson = Person::find()->with(['companys', 'phonemaildatas','companyid'])
-									->where(['id' => $ids])
-									->all();
+                                            ->where(['id' => $ids])
+                                            ->all();
  		foreach($modelPerson as $person) {
  			$list = [];
  			$listEvent = [];
@@ -344,6 +329,36 @@ class Data extends CommonLDC
  			}
  			$list['fields'] = [$arComp,$pers,$exp,$gallery];
  			$this->tempArray[] = $list;
+/*
+ * {
+        "type": "next",
+        "name": "Галерея",
+        "kind": "album",
+        "id": 146
+    },
+    {
+        "type": "list",
+        "name": "",
+        "kind": "all/photo",
+        "style": "default",
+        "id": 146,
+        "itemStyle": "rect",
+        "fields": [
+            {
+                "type": "info",
+                "name": "",
+                "image": "https:\/\/encrypted-tbn2.gstatic.com\/images?q=tbn:ANd9GcQr2Ri6ZLeoOry_br1Rt4RVN5qFNnatxdiKMLNs82Jv5LAk4CCx",
+                "id": 7
+            },
+            {
+                "type": "info",
+                "name": "",
+                "image": "https:\/\/encrypted-tbn2.gstatic.com\/images?q=tbn:ANd9GcR5jGG-uKd2Fiz6419sPP7NvxRw1kpzK61XXYkvyUO6hjGfap9U",
+                "id": 8
+            }
+        ]
+    }
+ */                        
  		}
  		return $this->tempArray;
     }   
