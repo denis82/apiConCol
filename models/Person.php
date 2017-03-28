@@ -9,8 +9,14 @@ use yii\data\ActiveDataProvider;
 
 class Person extends ActiveRecord
 {
+    /**
+     * @var array
+     */
+    public $dataResult = [];
+    
 	const ACCESS_PUBLIC = 2;
 	const EVENT_IBLOCK = 9;
+	
 	
 	
 	public function getPhonemaildatas()
@@ -226,4 +232,46 @@ class Person extends ActiveRecord
 			return $list = [];
 		}
 	}
+	
+	public function updatePerson($ids)
+    {
+        
+        $idUser = Yii::$app->user->identity->getId();
+        
+        $userInfo = Person::findOne($idUser);
+        $userInfo->attributes = Yii::$app->request->post();
+        $model = new UploadForm();
+        $newImgName = $model->uploadImg(Yii::$app->params['pathToFolderPersonInWebSite'],$userInfo->photo);
+        if($newImgName) {
+            $userInfo->photo = $newImgName;
+        }
+        
+        if($userInfo->validate()) {
+            if($userInfo->save()){
+                $this->datas['success'] = true;
+            }
+        } else {
+            $this->datas["errors"] = $userInfo->errors;
+        }
+        
+        $phoneMail = Phonemaildata::deleteAll(['idPerson' => $idUser]);
+        
+        $tempArray = Yii::$app->request->post(self::FIELDS);
+        if(!empty($tempArray)) {
+            foreach($tempArray as $fields) {
+                $phoneMail = new Phonemaildata;
+                $phoneMail->attributes = $fields;
+                $phoneMail->idPerson = $idUser;
+                if($phoneMail->validate()) {
+                    if($phoneMail->save()) {
+                        $this->datas['success'] = true;
+                    } else {
+                        $this->datas['success'] = false;
+                    }
+                } else {
+                    $this->datas["errors"] = $userInfo->errors;
+                }   
+            }
+        } 
+    }
 }

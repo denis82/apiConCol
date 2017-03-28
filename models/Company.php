@@ -9,7 +9,13 @@ use app\models\UploadFile;
 
 class Company extends ActiveRecord 
 {
-    public $dataResult = [];
+    public $dataResult = []; 
+    public $idCompany;
+    public $create;
+    public $imagefiledelete;
+    public $fields = [];
+    public $myErrors = [];
+    public $name;
     
     public function rules()
     {
@@ -51,38 +57,65 @@ class Company extends ActiveRecord
         return $this->hasMany(CompanyPerson::className(), ['idCompany' => 'company_id']);
     }
     
-    public function updateCompany($idCompany)
+    public function commonUpdateCompany() 
     {
-        $datas = [];
-        if(!Yii::$app->request->post('fields')) {
-            $fields = [];
-        } else {
-            $fields = Yii::$app->request->post('fields');
-            $modelCompany = self::find()->where(['company_id' =>$idCompany])->one();
-            $modelCompany->attributes = Yii::$app->request->post();
-            $modelCompany->company_name = Yii::$app->request->post('name');
-            if($modelCompany->validate()) {
-                $modelCompany->save();
-            } else {
-                $datas[] = $modelCompany->errors;
-            }
-            $phoneMail = Phonemaildata::deleteAll(['idCompany' => $idCompany]); // обновление данных компании tbl phonemaildata
-        }
-        
-        foreach($fields as $field) {
-            $phoneMail = new Phonemaildata();
-            $phoneMail->attributes = $field;
-            $phoneMail->idCompany = $idCompany;
-            
-            if($phoneMail->validate()) {
-                if(!$phoneMail->save()) {
-                    $datas[] = 'Phonemaildata is not save';
+        $checkUpdate = false;
+        if ($this->updateCompany()) {
+            if($this->deletePhonemaildata()) {
+                if($this->updatePhonemaildata()) {
+                    $checkUpdate = true;
                 }
-            } else {
-                $datas[] = $phoneMail->errors;
-            }	
+            }
         }
-        return $datas;
+        return $checkUpdate;
+    }
+    
+    public function updateCompany()
+    {
+        $update = false;
+        $modelCompany = self::find()->where(['company_id' =>$this->idCompany])->one();
+        $modelCompany->attributes = $this->attributes;
+        $modelCompany->company_name = $this->name;
+        if ($modelCompany->validate()) {
+            $modelCompany->save();
+        } else {
+            $this->myErrors = $modelCompany->errors;
+        }
+        if (!$modelCompany->hasErrors()) {
+            $update = true;
+        }
+        return $update;
+    }
+    
+    public function deletePhonemaildata()
+    {
+        if(Phonemaildata::deleteAll(['idCompany' => $this->idCompany])) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    public function updatePhonemaildata()
+    {
+        $result = false;
+        if(!empty($this->fields)) {
+            foreach ($this->fields as $field) {
+                $phoneMail = new Phonemaildata();
+                $phoneMail->attributes = $field;
+                $res = $phoneMail->attributes;
+                $phoneMail->idCompany = $this->idCompany;  
+                if ($phoneMail->validate()) {
+                    $phoneMail->save();
+                } else {
+                    $this->myErrors = $phoneMail->errors;
+                }
+            }
+            if (!$phoneMail->hasErrors()) {
+                return true;
+            }
+        }  
+        return $result;
     }
     
     /*
@@ -119,7 +152,7 @@ class Company extends ActiveRecord
         $modelPerson = Person::findOne($idUser);
         $companyPerson = $modelPerson->companys;
         if($companyPerson) {
-            $this->dataResult['datas'] = $this->companyInfo($idUser,$idCompany,$exeptionFields);
+            $this->dataResult['datas'][] = $this->companyInfo($idUser,$idCompany,$exeptionFields);
             $scope = [];
         }
         if(!empty($this->dataResult['datas'])) {
@@ -130,18 +163,16 @@ class Company extends ActiveRecord
     
     
     
-    public function updatePersonCompany($idCompany)
+    public function updatePersonCompany()
     {
-       // $idCompany = Yii::$app->request->post('id');
-       //$this->tempArray = Yii::$app->request->post('fields');
         $idUser = Yii::$app->user->identity->getId();
-        $modelCompany = self::findOne($idCompany);
+        $modelCompany = self::findOne($this->idCompany);
         $modelUploadForm = new UploadForm();
         
         // если условие выполняется то данные компании обновятся 
         
-        if(true != Yii::$app->request->post('create')) {    
-            if(true == Yii::$app->request->post('imagefiledelete')) {   // если фотку компании нужно просто удалить
+        if (true != $this->create) {    
+            if (true == $this->imagefiledelete) {   // если фотку компании нужно просто удалить
                 $modelCompany->company_image = $modelUploadForm->deleteImg(Yii::$app->params['pathToFolderCompanyInWebSite'],$modelCompany->company_image);
             } else { // если фотку компании нужно загрузить
                 $modelCompany->company_image = $modelUploadForm->uploadImg(Yii::$app->params['pathToFolderCompanyInWebSite'],$modelCompany->company_image);
@@ -150,16 +181,19 @@ class Company extends ActiveRecord
         }
         
         // если условие выполняется компания будет создана 
-        $res[] = Yii::$app->request->post('create');
-        if(true == Yii::$app->request->post('create')) {              
-            $idCompany = $this->createCompany(Yii::$app->request->post('name'),$idUser);
-            $this->updateCompany($idCompany,Yii::$app->request->post());
+        if (true == $this->create) {              
+            $this->idCompany = $this->createCompany(Yii::$app->request->post('name'),$idUser);
+            $this->commonUpdateCompany();
             $this->company_image = $modelUploadForm->uploadImg(Yii::$app->params['pathToFolderCompanyInWebSite']);
             $this->save();
         }
         
-        $this->dataResult['errors'] = $this->updateCompany($idCompany);
-        $this->dataResult['datas'] = $this->companyInfo($idUser,$idCompany,['surname', 'middlename']);
+        
+        $arResult = $this->commonUpdateCompany();
+        $this->dataResult['datas'][] = $this->companyInfo($idUser,$this->idCompany,['surname', 'middlename']);
+        if(!empty($this->dataResult['datas'])) {
+                $this->dataResult['success'] = true;
+        }
         return $this->dataResult;
     }
     
@@ -187,6 +221,7 @@ class Company extends ActiveRecord
                 //$tempArray['image'] = Url::to('@web/uploads/userAvatars/smallSize/',true) . '/' .$info;
             }
             //$tempArray =[];
+            $tempArray['id'] = $companyInfo->company_id;
             $tempArray['name'] = $companyInfo->company_name;
             $tempArray['logo'] = $companyInfo->company_logo;
             $tempArray['scope'] = '';//$companyInfo->company_name; 

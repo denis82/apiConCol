@@ -61,14 +61,14 @@ class ProfileController extends MainapiController
 
     /**
     * Регистрация пользователя
-    * @param string   $login логин пользователя
-    * @param string   $password  пароль пользователя
-    * @param string   $surname  Фамилия
-    * @param string   $name  Имя
-    * @param string   $middlename  Отчество
-    * @param string   $company Компания
-    * @param string   $work Должность
-    * @param string   $phone Телефон
+    * @param string   $_POST['login'] логин пользователя
+    * @param string   $_POST['password']  пароль пользователя
+    * @param string   $_POST['surname']  Фамилия
+    * @param string   $_POST['name']  Имя
+    * @param string   $_POST['middlename']  Отчество
+    * @param string   $_POST['company'] Компания
+    * @param string   $_POST['work'] Должность
+    * @param string   $_POST['phone'] Телефон
     * @return boolean/errors 
     */
     
@@ -76,25 +76,27 @@ class ProfileController extends MainapiController
     {
         $generate = Yii::$app->security;
         $modelRegistration = new Registration();
+        $modelRegistration->attributes = Yii::$app->request->post();
         $this->tempArray = $modelRegistration->regist();
         $this->datas = ArrayHelper::merge($this->datas, $this->tempArray);
-        $this->datas[self::DATAS] = $this->datas;
         return $this->datas; 
     }
 
     /**
     * Обновление пароля пользователя
-    * @param string   $newPassword  пароль пользователя
-    * @param string   $oldPassword  старый пароль
-    * @param string   $name  Имя
-    * @param string   $middlename  Отчество
+    * @param string   $_POST['newPassword']  пароль пользователя
+    * @param string   $_POST['oldPassword']  старый пароль
+    * @param string   $_POST['name']  Имя
+    * @param string   $_POST['middlename']  Отчество
     * @return boolean/errors 
     */
 
     public function actionUpdatepassword()
     {
-        $UpdatepasswordModel = new Updatepassword();        
-        $this->tempArray = $UpdatepasswordModel->updatePassword();
+        $UpdatepasswordModel = new Updatepassword();
+        $password = Yii::$app->request->post('oldPassword');
+        $newPassword = Yii::$app->request->post('newPassword');
+        $this->tempArray = $UpdatepasswordModel->updatePassword($password,$newPassword);
         $this->datas = ArrayHelper::merge($this->datas, $this->tempArray);
         $this->checkAuth();
         return $this->datas;
@@ -103,9 +105,9 @@ class ProfileController extends MainapiController
     /**
      * Авторизация
      *
-     * @param string $login логин
-     * @param string $password пароль
-     * @return boolean  - token($_COOKIE)
+     * @param string $_POST['login'] логин
+     * @param string $_POST['password'] пароль
+     * @return boolean  - $_COOKIE['token']
      */
 
     public function actionLogin()
@@ -139,7 +141,7 @@ class ProfileController extends MainapiController
 
     /**
      * Закрыть сессию авторизации
-     * @param string - token($_COOKIE)
+     * @param string - $_COOKIE['token']
      * @return boolean 
      */
 
@@ -163,7 +165,7 @@ class ProfileController extends MainapiController
     /**
      *  Проверяет зарегестрирован ли человек на событие и если да то на какие 
      *
-     * @param array $ids идентификаторы событий 
+     * @param array $_POST['ids'] идентификаторы событий 
      * @return array [
      *                  integer $state - значение состояния регистрации
      *                  Integer $eventId - идентификатор события
@@ -190,10 +192,10 @@ class ProfileController extends MainapiController
     /	
     */
 
-    public function actionEvents()
-    {
-        $modelEvent = new Event();
-        $this->tempArray = $modelEvent->listPersonEvent();
+//    public function actionEvents()
+//    {
+//        $modelEvent = new Event();
+//        $this->tempArray = $modelEvent->listPersonEvent();
 //        $idUser = Yii::$app->user->identity->getId();
 //        $events = EventSubscription::findAll(['idUser' => $idUser]);
 //        
@@ -210,15 +212,29 @@ class ProfileController extends MainapiController
 //        } else {
 //            $this->datas[self::DATAS] = [];
 //        }
-        $this->datas = ArrayHelper::merge($this->datas, $this->tempArray);
-        $this->checkAuth();
-        return $this->datas;
-    }
+//        $this->datas = ArrayHelper::merge($this->datas, $this->tempArray);
+//        $this->checkAuth();
+//        return $this->datas;
+//    }
+
+
     /*  Обновляет сведения о пользователе
     /	вход: 	token 
     /	выход:  update token 
     /	
     */
+    
+    /**
+     *  Обновляет сведения о пользователе
+     *
+     * @param string  - $_COOKIE['token']
+     * @param array   - $_POST['fields']  информация о персоне пользователя
+     * @param file    - $imagefile - [File[image/*]][Option] - загрузить картинку фотографии пользователя (не обязательно, если этого поля нет, значит картинка остаётся прежней)[07.02.2017]
+     * @param boolean[Option] -  imagefiledelete - - если true, удалить фотографию пользователя (не обязательное, по умолчанию false) [10.02.2017]
+     * @return array [
+     *                  userPerson - информация о персоне пользователя
+     *               ]
+     */
 
     public function actionUpdate()
     {
@@ -290,6 +306,7 @@ class ProfileController extends MainapiController
     */
 
     // вывод фоток на которых я(или кто-то) отметил меня
+    
     public function actionPhotoswithme()
     {
         $idUser = Yii::$app->user->identity->getId();
@@ -460,9 +477,15 @@ class ProfileController extends MainapiController
 
     public function actionUpdatecompany()
     {
+        $res = [];
         $modelCompany = new Company();
-        $idCompany = Yii::$app->request->post('id');
-        $this->tempArray = $modelCompany->updatePersonCompany($idCompany);
+        $modelCompany->idCompany = Yii::$app->request->post('id');
+        $modelCompany->create = Yii::$app->request->post('create');
+        $modelCompany->imagefiledelete = Yii::$app->request->post('imagefiledelete');
+        $modelCompany->fields = Yii::$app->request->post('fields');
+        $modelCompany->name = Yii::$app->request->post('name');
+        $modelCompany->attributes = Yii::$app->request->post();
+        $this->tempArray = $modelCompany->updatePersonCompany();
         $this->datas = ArrayHelper::merge($this->datas, $this->tempArray);
         $this->checkAuth();
         return $this->datas;

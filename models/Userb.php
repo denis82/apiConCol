@@ -7,7 +7,7 @@ use yii\web\IdentityInterface;
 use app\components\MyBehavior;
 use yii\db\ActiveRecord;
 
-class Userb extends ActiveRecord implements IdentityInterface
+class Userb extends ActiveRecord 
 {
 // 	// логин пользователя
  	public $id;
@@ -33,14 +33,14 @@ class Userb extends ActiveRecord implements IdentityInterface
 	{
 		return [
 			
-				[['user_login','user_password'], 'required','message'=>'Обязательно для заполнения {attribute}.'],
-				['user_login','email','message'=>'Не валидный email {attribute}.'],
-				['user_login', 'unique','message'=>'Пользователь с таким логином уже существует.']
+				[['login','password'], 'required','message'=>'Обязательно для заполнения {attribute}.'],
+				['login','email','message'=>'Не валидный email {attribute}.'],
+				['login', 'unique','message'=>'Пользователь с таким логином уже существует.']
 			];
 	}
 	 public static function tableName()
     {
-        return "user" ;
+        return "a_user" ;
     }
 	
 	public function getPhonemaildatas()
@@ -55,33 +55,7 @@ class Userb extends ActiveRecord implements IdentityInterface
             ->viaTable('companyUser', ['idUser' => 'idUser']);
     }
 
-	public static function findIdentityByAccessToken($token, $type = null)
-    {
-		//var_dump( $token);die();
-        return self::findOne(['access_token' => $token]);
-    }
-    public static function findIdentity($id)
-    {
-    
-    }
-    
-    public function getId()
-    {
-		//var_dump($this->idUser);die();
-		
-		$this->id = $this->user_id;
-		return $this->id;
-    }
-    
-    public function getAuthKey()
-    {
-    
-    }
-    
-    public function validateAuthKey($authKey)
-    {
-    
-    }
+
     
 
 

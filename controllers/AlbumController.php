@@ -92,27 +92,6 @@ class AlbumController extends MainapiController
     $idImage = $this->simpleArray(Yii::$app->request->post('ids'));
 
     $this->tempArray = $modelLabel->getInfoLabel($idImage);
-    //       $idImage = Yii::$app->request->post('ids');
-    //        $idImage = $this->simpleArray($idImage);
-    //        $modelLabel = Label::find()->where(['gallery_id' => $idImage])->all();
-    //
-    //        if($modelLabel) {
-    //            foreach($modelLabel as $img){
-    //                $tempArray = [];
-    //                $tempArray['id'] = $img->gallery_id; 
-    //                $tempArray['labels']['id'] = $img->id; 
-    //                $tempArray['labels']['left'] = $img->left;
-    //                $tempArray['labels']['right'] = $img->right;
-    //                $tempArray['labels']['top'] = $img->top; 
-    //                $tempArray['labels']['bottom'] = $img->bottom;
-    //                $tempArray['labels']['person'] = $img->idPerson;
-    //                $tempArray['labels']['name'] = $img->name;
-    //                $tempArray['labels']['info'] = $img->info;
-    //                $this->tempArray[] = $tempArray;
-    //            }
-    //        }	
-    //
-    //        if(!empty($this->tempArray)) {$this->datas['success'] = true;}
     $this->checkAuth();
     $this->datas = $this->datas = ArrayHelper::merge($this->datas, $this->tempArray);
     return $this->datas;
@@ -133,27 +112,10 @@ class AlbumController extends MainapiController
 
     public function actionLabelme()
     {
-       // $dataLabel = Yii::$app->request->post();
-        $modelLabel = new Label(['scenario' => Label::SCENARIO_KNOWN_PERSON]);
-        $this->tempArray = $modelLabel->getInfoLabelMe();
-        //$modelLabel->attributes = $dataLabel;
-        //$modelLabel->idPerson = Yii::$app->user->identity->getId();
-        //$modelLabel->gallery_id = Yii::$app->request->post('id');
-        
-//         if($modelLabel->validate()) {
-//             
-//             if($modelLabel->save()) {
-//                 $this->tempArray['id'] = $modelLabel->id;
-//             }
-//         } else {
-//             $this->datas['errors'] = $modelLabel->errors;
-//         } 
-//         
-//         if(!empty($this->tempArray)) {$this->datas['success'] = true;}
-        
+        $modelLabel = new Label();
+        $this->tempArray = $modelLabel->setInfoLabelMe();
         $this->checkAuth();
         $this->datas = $this->datas = ArrayHelper::merge($this->datas, $this->tempArray);
-        //$this->datas[self::DATAS] = $this->tempArray;
         return $this->datas;
     }
     
@@ -173,23 +135,10 @@ class AlbumController extends MainapiController
     
     public function actionLabelperson()
     {
-        $dataLabel = Yii::$app->request->post();
-        $modelLabel = new Label(['scenario' => Label::SCENARIO_KNOWN_PERSON]);
-        $modelLabel->attributes = $dataLabel;
-        $modelLabel->gallery_id = Yii::$app->request->post('id');
-        
-        if($modelLabel->validate()) {
-            
-            if($modelLabel->save()) {
-                $this->tempArray['id'] = $modelLabel->id;
-            }
-        } else {
-            $this->datas['errors'] = $modelLabel->errors;
-        } 
-        
-        if(!empty($this->tempArray)) {$this->datas['success'] = true;}
+        $modelLabel = new Label();
+        $this->tempArray = $modelLabel->setInfoLabelPerson();
         $this->checkAuth();
-        $this->datas[self::DATAS] = $this->tempArray;
+        $this->datas = $this->datas = ArrayHelper::merge($this->datas, $this->tempArray);
         return $this->datas;
     }
     
@@ -208,23 +157,10 @@ class AlbumController extends MainapiController
     
     public function actionLabelunknown()
     {
-        $dataLabel = Yii::$app->request->post();
-        $modelLabel = new Label(['scenario' => Label::SCENARIO_UNKNOWN_PERSON]);
-        $modelLabel->attributes = $dataLabel;
-        $modelLabel->gallery_id = Yii::$app->request->post('id');
-        
-        if($modelLabel->validate()) {
-            
-            if($modelLabel->save()) {
-                $this->tempArray['id'] = $modelLabel->id;
-            }
-        } else {
-            $this->datas['errors'] = $modelLabel->errors;
-        } 
-        
-        if(!empty($this->tempArray)) {$this->datas['success'] = true;}
+        $modelLabel = new Label();
+        $this->tempArray = $modelLabel->setInfoLabelunknown();
         $this->checkAuth();
-        $this->datas[self::DATAS] = $this->tempArray;
+        $this->datas = $this->datas = ArrayHelper::merge($this->datas, $this->tempArray);
         return $this->datas;
     }
     

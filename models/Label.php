@@ -24,19 +24,25 @@ class Label extends ActiveRecord
     */
     public $dataResult = [];
     
-    /**
-    * Возвращает список сценариев и соответствующие активные аттрибуты
-    * @return array.
-    */
-    
+    public $id_gall;
+   /**
+   * Возвращает список сценариев и соответствующие активные аттрибуты
+   * @return array.
+   */
+   
     public function scenarios()
     {
-        return [
-            self::SCENARIO_KNOWN_PERSON => ['gallery_id','idPerson','left','right','top','bottom'],
-            self::SCENARIO_UNKNOWN_PERSON => ['gallery_id','left','right','top','bottom'],
-        ];
+//         return [
+//             self::SCENARIO_KNOWN_PERSON => ['gallery_id','idPerson','left','right','top','bottom'],
+//             self::SCENARIO_UNKNOWN_PERSON => ['gallery_id','left','right','top','bottom'],
+//             'default' => ['username', 'email', 'password'],
+//         ];
+        $scenarios = parent::scenarios();
+        $scenarios[self::SCENARIO_KNOWN_PERSON] = ['gallery_id','idPerson','left','right','top','bottom'];
+        $scenarios[self::SCENARIO_UNKNOWN_PERSON] = ['gallery_id','left','right','top','bottom'];
+        return $scenarios;
     }
-    
+
     /**
     * @return array правила валидации
     * @see scenarios()
@@ -79,24 +85,30 @@ class Label extends ActiveRecord
     public function getInfoLabel($idImage) 
     {
 
-        $modelLabel = Label::find()->where(['gallery_id' => $idImage])->all();
-
+        $modelLabel = Gallery::find()->with('labels')->where(['gallery_id' => $idImage])->all();
+        $k = 0;
         if($modelLabel) {
             foreach($modelLabel as $img){
                 $tempArray = [];
-                $tempArray['id'] = $img->gallery_id; 
-                $tempArray['labels']['id'] = $img->id; 
-                $tempArray['labels']['left'] = $img->left;
-                $tempArray['labels']['right'] = $img->right;
-                $tempArray['labels']['top'] = $img->top; 
-                $tempArray['labels']['bottom'] = $img->bottom;
-                $tempArray['labels']['person'] = $img->idPerson;
-                $tempArray['labels']['name'] = $img->name;
-                $tempArray['labels']['info'] = $img->info;
-                $this->dataResult['datas'][] = $tempArray;
+                $this->id_gall = $img->gallery_id;
+               
+                foreach ($img->labels as $label) {
+                        $tempArray ['id'] = $label['id']; 
+                        $tempArray ['left'] = $label['left'];
+                        $tempArray ['right'] = $label['right'];
+                        $tempArray ['top'] = $label['top']; 
+                        $tempArray ['bottom'] = $label['bottom'];
+                        $tempArray ['person'] = $label['idPerson'];
+                        $tempArray ['name'] = $label['name'];
+                        $tempArray ['info'] = $label['info'];
+                        $dataResult['labels'][] = $tempArray;    
+                }
+                $tempArray = [];
+                $dataResult['id'] = $img->gallery_id; 
+                $this->dataResult['datas'][] = $dataResult;
+                $dataResult['labels'] = [];
             }
         }
-
         if(!empty($this->dataResult)) {
             $this->dataResult['success'] = true;
             
@@ -104,10 +116,23 @@ class Label extends ActiveRecord
         return $this->dataResult;
     }
     
-    public function getInfoLabelMe() 
+   /**
+    * Помечает пользователя на фотографии
+    * @param integer $id идентификатор фотографии
+    * @param string  $info  текст метки
+    * @param float   $left  координаты прямоугольника в процентном соотношении от размера фотографии (левый край)
+    * @param float   $right  координаты прямоугольника в процентном соотношении от размера фотографии (правый край)
+    * @param float   $top  координаты прямоугольника в процентном соотношении от размера фотографии (верхний край)
+    * @param float   $bottom координаты прямоугольника в процентном соотношении от размера фотографии (нижний край)
+    * @return array [
+    *               id - [Integer]  идентификатор созданной метки
+    *               ]
+    */
+    
+    public function setInfoLabelMe() 
     {
 
-        $modelLabel = new Label();
+        $modelLabel = new Label(['scenario' => Label::SCENARIO_KNOWN_PERSON]);
         $modelLabel->attributes = Yii::$app->request->post();
         $modelLabel->idPerson = Yii::$app->user->identity->getId();
         $modelLabel->gallery_id = Yii::$app->request->post('id');
@@ -123,6 +148,75 @@ class Label extends ActiveRecord
         if(!empty($this->dataResult)) {
             $this->dataResult['success'] = true;
             
+        }
+        return $this->dataResult;
+    }
+    
+    /**
+    * Помечает пользователя на фотографии
+    * @param integer $id идентификатор фотографии
+    * @param integer $person идентификатор персоны
+    * @param string  $info  текст метки
+    * @param float   $left  координаты прямоугольника в процентном соотношении от размера фотографии (левый край)
+    * @param float   $right  координаты прямоугольника в процентном соотношении от размера фотографии (правый край)
+    * @param float   $top  координаты прямоугольника в процентном соотношении от размера фотографии (верхний край)
+    * @param float   $bottom координаты прямоугольника в процентном соотношении от размера фотографии (нижний край)
+    * @return array [
+    *               id - [Integer]  идентификатор созданной метки
+    *               ]
+    */
+    
+    public function setInfoLabelPerson() 
+    {
+        $modelLabel = new Label(['scenario' => Label::SCENARIO_KNOWN_PERSON]);
+        $modelLabel->attributes = Yii::$app->request->post();
+        $modelLabel->gallery_id = Yii::$app->request->post('id');
+        
+        if($modelLabel->validate()) {
+            if($modelLabel->save()) {
+                $this->dataResult['id'] = $modelLabel->id;
+            }
+        } else {
+            $this->dataResult['errors'] = $modelLabel->errors;
+        } 
+        
+        if(!empty($this->dataResult)) {
+            $this->dataResult['success'] = true;
+            
+        }
+        return $this->dataResult;
+    }
+    
+    /**
+    * Делает текстовую метку на фотографии
+    * @param integer $id идентификатор фотографии
+    * @param string  $info  текст метки
+    * @param float   $left  координаты прямоугольника в процентном соотношении от размера фотографии (левый край)
+    * @param float   $right  координаты прямоугольника в процентном соотношении от размера фотографии (правый край)
+    * @param float   $top  координаты прямоугольника в процентном соотношении от размера фотографии (верхний край)
+    * @param float   $bottom координаты прямоугольника в процентном соотношении от размера фотографии (нижний край)
+    * @return array [
+    *               id - [Integer]  идентификатор созданной метки
+    *               ]
+    */
+    
+    public function setInfoLabelunknown()
+    {
+        $modelLabel = new Label(['scenario' => Label::SCENARIO_UNKNOWN_PERSON]);
+        $modelLabel->attributes = Yii::$app->request->post();
+        $modelLabel->gallery_id = Yii::$app->request->post('id');
+ 
+        if($modelLabel->validate()) {
+            
+            if($modelLabel->save()) {
+                $this->dataResult['id'] = $modelLabel->id;
+            }
+        } else {
+            $this->dataResult['errors'] = $modelLabel->errors;
+        } 
+        
+         if(!empty($this->dataResult)) {
+            $this->dataResult['success'] = true;
         }
         return $this->dataResult;
     }

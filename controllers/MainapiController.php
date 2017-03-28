@@ -5,10 +5,10 @@ namespace app\controllers;
 use Yii;
 use yii\BaseYii;
 use yii\db\Query;
-use yii\rest\Controller;
 use app\models\User;
-use app\filters\BodyParamAuth;
+use yii\rest\Controller;
 use app\behaviors\MyBehavior;
+use app\filters\BodyParamAuth;
 
 class MainapiController  extends Controller
 {

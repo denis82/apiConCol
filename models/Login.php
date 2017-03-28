@@ -74,6 +74,8 @@ class Login extends Model
         }
         return false;
     }
+    
+    
 	 public function getUser()
     {
             return User::findOne(['user_login' => $this->login]);

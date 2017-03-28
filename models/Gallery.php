@@ -11,5 +11,10 @@ class Gallery extends ActiveRecord
     {
         return "gallery" ;
     }
+    
+    public function getLabels()
+    {
+        return $this->hasMany(Label::className(), ['gallery_id' => 'gallery_id']);
+    }
 
 }

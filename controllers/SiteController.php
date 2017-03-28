@@ -66,7 +66,7 @@ class SiteController extends Controller
 			->setTextBody('Текст сообщения')
 			->setHtmlBody('<b>текст сообщения в формате HTML</b><a href = "http://con-col-lp.picom.su/basic/web/site/index">ntrcn</a>')
 			->send();
-			var_dump($res); die();
+			var_dump($_SERVER); die();
         //return $this->render('index');
     }
 

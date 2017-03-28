@@ -101,8 +101,13 @@ $config = [
                         'app/error' => 'error.php',
                     ],
                 ],
+                'eauth' => [
+                    'class' => 'yii\i18n\PhpMessageSource',
+                    'basePath' => '@eauth/messages',
+                ],
             ],
        ],
+       'eauth' => require(__DIR__ . '/eauth.php'),
        'mailer' => [
             'class' => 'yii\swiftmailer\Mailer',
             'transport' => [

@@ -12,7 +12,6 @@ class Registration extends Model
 	public $login;
 	public $password;
 	public $userIp;
-	public $token;
 	public $surname;
 	public $name;
 	public $middlename;
@@ -20,6 +19,10 @@ class Registration extends Model
 	public $work;
 	public $phone;
 	public $errors = [];
+	
+    private $token;
+    private $group = 1;
+	
 	/**
     * @var array
     */
@@ -40,14 +43,25 @@ class Registration extends Model
 		];
 	}
 	
-	public function regist()
+	/**
+    * Регистрация пользователя
+    * @param string   $_POST['login'] логин пользователя
+    * @param string   $_POST['password']  пароль пользователя
+    * @param string   $_POST['surname']  Фамилия
+    * @param string   $_POST['name']  Имя
+    * @param string   $_POST['middlename']  Отчество
+    * @param string   $_POST['company'] Компания
+    * @param string   $_POST['work'] Должность
+    * @param string   $_POST['phone'] Телефон
+    * @return boolean/errors 
+    */
+    
+    public function regist()
     {
         $generate = Yii::$app->security;
-        $this->attributes = Yii::$app->request->post();
         $this->token = $generate->generateRandomString();
         if ($this->validate()) {
-            $rty = $this->signup();
-            if($rty) {
+            if($this->signup()) {
                 
                 $this->dataResult['authorized'] = true;
                 $this->dataResult['success'] = true;
@@ -64,62 +78,75 @@ class Registration extends Model
             $this->dataResult['errors'] = $this->errors;
         }
         $this->dataResult['errors'] = $this->errors;
-        $this->dataResult['x'] = $rty;
         return $this->dataResult;
     
-	}
-	 public function signup()
-	{
+    }
+    
+    
+    public function signup()
+    {
+        $success = false;
+        $person = $this->createPerson();
         
-		
-		$person = new Person();
-		//$person->id = $user->user_id;
-		$person->firstname = $this->name;
-		$person->middlename = $this->middlename;
-		$person->surname = $this->surname;
-		$person->save();
-		
-		$RegistDatas = ['company' => $this->company, 'work' => $this->work, 'phone' => $this->phone];
-		foreach($RegistDatas as $key => $kind) {
-			$phonemail = new Phonemaildata();
-			if('phone' == $key) {
-				$phonemail->group = 1;
-			}
-			$phonemail->idPerson = $person->id;
-			$phonemail->kind = $key;
-			$phonemail->info = $kind;
-			$phonemail->save();
-		}
-		
-		if($person->validate()) {
-			if($person->save()) {
-				$user = new User();
-				$user->user_login = $this->login;
-				$user->user_idPerson = $person->id;
-				$user->user_password = md5($this->password);
-				$user->user_firstname = $this->name;
-				$user->user_surname = $this->surname;
-				$user->user_comp = $this->company;
-				$user->user_job = $this->work;
-				$user->user_phone = $this->phone;
-				$user->access_token = $this->token;
-				if($user->validate())
-				{
-					$user->save();
-					return true;
-				} else {
-                    return $user->errors;
-				}
-			} else {
-				return false;
-			}
-		} else {
-			$this->errors = $person->errors;
-			return 1;
-		}
-		
-	} 
-	
+        if(!$person->hasErrors()) {
+            $RegistDatas = ['company' => $this->company, 'work' => $this->work, 'phone' => $this->phone];
+            foreach($RegistDatas as $key => $kind) {
+                $phonemail = new Phonemaildata();
+                if('phone' == $key) {
+                    $phonemail->group = $this->group;
+                }
+                $phonemail->idPerson = $person->id;
+                $phonemail->kind = $key;
+                $phonemail->info = $kind;
+                $phonemail->save();
+            }
+        
+            $user = $this->createUser($person->id);
+            
+            if(!$user->hasErrors()) {
+                $success = true;
+            } else {
+                $this->errors[] = $user->errors;
+            }
+            
+        } else {
+            $this->errors[] = $person->errors;
+        }
+        return $success;
+    } 
+
+    private function createPerson()
+    {
+        $person = new Person();
+        $person->firstname = $this->name;
+        $person->middlename = $this->middlename;
+        $person->surname = $this->surname;
+        if($person->validate()) {
+            $person->save();
+        }
+        return $person;
+    }
+    
+    private function createUser($id = false)
+    {
+        $user = new User();
+        $user->user_login = $this->login;
+        $user->user_password = md5($this->password);
+        $user->user_firstname = $this->name;
+        $user->user_surname = $this->surname;
+        $user->user_comp = $this->company;
+        $user->user_job = $this->work;
+        $user->user_phone = $this->phone;
+        $user->access_token = $this->token;
+        if($id) {
+            $user->user_idPerson = $id;
+        }
+        if($user->validate()){
+            $user->save();
+        } 
+        return $user;
+    }
+
 // 	 public function signup()
 // 	{
 // 		$user = new User();
@@ -160,34 +187,34 @@ class Registration extends Model
 // 			$this->errors = $user->errors;
 // 		}
 // 	} 
-	
-	
-	public function changePass()
-	{
-		$user = new User();
-		$user->user_login = $this->login;
-		$user->password = Yii::$app->getSecurity()->generatePasswordHash($this->password);//sha1($this->password);
-		$user->createdAt = date('Y-m-d');
-		$user->lastLoginTime = date('Y-m-d');
-		$user->lastLoginIp = ip2long($this->userIp);
-		$user->access_token = $this->token;
-		$user->save();
-	}
-	
-	
-	public function attributeLabels()
+
+
+    public function changePass()
+    {
+        $user = new User();
+        $user->user_login = $this->login;
+        $user->password = Yii::$app->getSecurity()->generatePasswordHash($this->password);//sha1($this->password);
+        $user->createdAt = date('Y-m-d');
+        $user->lastLoginTime = date('Y-m-d');
+        $user->lastLoginIp = ip2long($this->userIp);
+        $user->access_token = $this->token;
+        $user->save();
+    }
+
+
+    public function attributeLabels()
     {
         return [
             'name' => 'Имя',
             'login' => 'Логин',
             'password' => 'Пароль',
-			'userIp' => 'ip адрес',
-			'token' => 'Токен',
-			'surname' => 'Фамилия',
-			'middlename' => 'Отчество',
-			'company' => 'Компания',
-			'work' => 'Должность',
-			'phone' => 'Телефон',
+            'userIp' => 'ip адрес',
+            'token' => 'Токен',
+            'surname' => 'Фамилия',
+            'middlename' => 'Отчество',
+            'company' => 'Компания',
+            'work' => 'Должность',
+            'phone' => 'Телефон',
         ];
     }
 }
