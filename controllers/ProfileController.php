@@ -507,6 +507,17 @@ class ProfileController extends MainapiController
         $this->datas[self::DATAS] = $this->tempArray;
         return $this->datas;
     }
+    
+    public function actionNotificationtoken() 
+    {
+    
+    }
+    public function actionDeletenotificationtoken() 
+    {
+    
+    }
+    
+    
 
     /*  Возвращяет подробный список сведений о персоне
     /	вход: 	$userInfo - [Integer] - id персоны

@@ -5,11 +5,11 @@
             'popup' => true, // Use the popup window instead of redirecting.
             'cache' => false, // Cache component name or false to disable cache. Defaults to 'cache' on production environments.
             'cacheExpire' => 0, // Cache lifetime. Defaults to 0 - means unlimited.
-            'httpClient' => array(
+            'httpClient' => [
                 // uncomment this to use streams in safe_mode
                 //'useStreamsFallback' => true,
-            ),
-            'services' => array( // You can change the providers and their classes.
+            ],
+            'services' => [ // You can change the providers and their classes.
 //                 'google' => array(
 //                     'class' => 'nodge\eauth\services\GoogleOpenIDService',
 //                     //'realm' => '*.example.org', // your domain, can be with wildcard to authenticate on subdomains.
@@ -24,13 +24,13 @@
                     'key' => '...',
                     'secret' => '...',
                 ),
-                'google_oauth' => array(
+                'google_oauth' => [
                     // register your app here: https://code.google.com/apis/console/
                     'class' => 'nodge\eauth\services\GoogleOAuth2Service',
-                    'clientId' => '...',
-                    'clientSecret' => '...',
+                    'clientId' => '871507680263-6g2sjenb3nidsj0apr74nscpi64i19vd.apps.googleusercontent.com',
+                    'clientSecret' => 'uP-brV_4Jn69KRcdGvS90AEg',
                     'title' => 'Google (OAuth)',
-                ),
+                ],
                 'yandex_oauth' => array(
                     // register your app here: https://oauth.yandex.ru/client/my
                     'class' => 'nodge\eauth\services\YandexOAuth2Service',
@@ -99,7 +99,7 @@
                     'clientPublic' => '...',
                     'title' => 'Odnoklas.',
                 ),
-            ),
+            ],
         ];
  
         

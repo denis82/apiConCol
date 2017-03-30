@@ -3,102 +3,118 @@
 namespace app\controllers;
 
 use Yii;
+use app\models\User;
+use yii\filters\AccessControl;
+use yii\web\Controller;
+use app\models\LoginForm;
+use app\models\Social;
+use yii\helpers\VarDumper;
+//use \nodge\eauth\openid\ControllerBehavior;
 
+//use \nodge\eauth\openid\ControllerBehavior;
 
 class SocialController extends MainapiController
 {
 
-    private $network = 'network'
+    private $network = 'network';
 
+    public function actions()
+    {
+        return array(
+            'error' => array(
+                'class' => 'yii\web\ErrorAction',
+            ),
+        );
+    }
+    
+    public function behaviors() {
+        return array(
+            'access' => array(
+                'class' => AccessControl::className(),
+                'only' => array('login'),
+                'rules' => array(
+                    array(
+                        'allow' => true,
+//                      'roles' => array('?'),
+                    ),
+                    array(
+                        'allow' => false,
+                        'denyCallback' => array($this, 'goHome'),
+                    ),
+                ),
+            ),
+            'eauth' => array(
+                // required to disable csrf validation on OpenID requests
+                'class' => \nodge\eauth\openid\ControllerBehavior::className(),
+                'only' => array('login'),
+            ),
+        );
+    }
+    
+    
+    
+    public function init(){
+        parent::init();
+        $this->optionalActions = ['registration','login'];
+    }
+    
     public function actionRegistration() 
     {
         $serviceName = Yii::$app->getRequest()->post($this->network);
-
         if (isset($serviceName)) {
-            /** @var $eauth \nodge\eauth\ServiceBase */
-            $eauth = Yii::$app->get('eauth')->getIdentity($serviceName);
-            $eauth->setRedirectUrl(Yii::$app->getUser()->getReturnUrl());
-            $eauth->setCancelUrl(Yii::$app->getUrlManager()->createAbsoluteUrl('site/login'));
+            
+            $eauth = Yii::$app->get('eauth')->getIdentity($serviceName);            
+            $_GET['code'] = Yii::$app->getRequest()->post('code');
+            $modelSocial = new Social;
+            $modelSocial->login = Yii::$app->getRequest()->post('login');
+            $this->datas['des'] = $eauth->authenticate();
             try {
-                if ($eauth->authenticate()) {
-                    
-//                  var_dump($eauth->getIsAuthenticated(), $eauth->getAttributes()); exit;
-                    $identity = User::findByEAuth($eauth);
-                    
-                    Yii::$app->getUser()->login($identity);
-                    // special redirect with closing popup window
-                    //$eauth->redirect();
-                }
-                else {
-                    // close popup window and redirect to cancelUrl
-                    $eauth->cancel();
-                }
+//                 if ($eauth->authenticate()) {
+//                 
+//                     $identity = $modelSocial->socialRegistration($eauth);
+//                     if ($identity) {
+//                         $this->datas['success'] = true;
+//                     }
+//                 }
             }
             catch (\nodge\eauth\ErrorException $e) {
-                // save error to show it later
                 Yii::$app->getSession()->setFlash('error', 'EAuthException: '.$e->getMessage());
-
-                // close popup window and redirect to cancelUrl
-//              $eauth->cancel();
-                $eauth->redirect($eauth->getCancelUrl());
             }
         }
-
-        $model = new LoginForm();
-        if ($model->load($_POST) && $model->login()) {
-            return $this->goBack();
-        }
-        else {
-            return $this->render('login', array(
-                'model' => $model,
-            ));
-        }
+        
+        $this->checkAuth();
+        //$this->datas['sd'] = $services;
+        return $this->datas;
     }
+    
+    
     
     public function actionLogin() 
     {
+        $modelSocial = new Social();
+        $serviceName = Yii::$app->getRequest()->post($this->network);
         
-        $serviceName = Yii::$app->getRequest()->getQueryParam('service');
-
         if (isset($serviceName)) {
-            /** @var $eauth \nodge\eauth\ServiceBase */
+            
             $eauth = Yii::$app->get('eauth')->getIdentity($serviceName);
-            $eauth->setRedirectUrl(Yii::$app->getUser()->getReturnUrl());
-            $eauth->setCancelUrl(Yii::$app->getUrlManager()->createAbsoluteUrl('site/login'));
+            $_GET['code'] = Yii::$app->getRequest()->post('code');
             try {
                 if ($eauth->authenticate()) {
-                    
-//                  var_dump($eauth->getIsAuthenticated(), $eauth->getAttributes()); exit;
-                    $identity = User::findByEAuth($eauth);
-                    
-                    Yii::$app->getUser()->login($identity);
-                    // special redirect with closing popup window
-                    //$eauth->redirect();
-                }
-                else {
-                    // close popup window and redirect to cancelUrl
-                    $eauth->cancel();
+                    $modelSocial->name = $eauth->getServiceName();
+                    $modelSocial->id = $eauth->getId();
+                    $identity = $modelSocial->socialLogin($eauth);
+                    if ($identity) {
+                        $this->datas['success'] = true;
+                    }
                 }
             }
             catch (\nodge\eauth\ErrorException $e) {
-                // save error to show it later
                 Yii::$app->getSession()->setFlash('error', 'EAuthException: '.$e->getMessage());
-
-                // close popup window and redirect to cancelUrl
-//              $eauth->cancel();
-                $eauth->redirect($eauth->getCancelUrl());
             }
         }
-
-        $model = new LoginForm();
-        if ($model->load($_POST) && $model->login()) {
-            return $this->goBack();
-        }
-        else {
-            return $this->render('login', array(
-                'model' => $model,
-            ));
-        }
+        
+        $this->checkAuth();
+        return $this->datas;
     }
     
     public function actionConnect() 
@@ -110,14 +126,6 @@ class SocialController extends MainapiController
     
     }
     public function actionUdatePassword() 
-    {
-    
-    }
-    public function actionNotificationtoken() 
-    {
-    
-    }
-    public function actionDeletenotificationtoken() 
     {
     
     }
