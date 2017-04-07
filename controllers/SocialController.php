@@ -9,6 +9,8 @@ use yii\web\Controller;
 use app\models\LoginForm;
 use app\models\Social;
 use yii\helpers\VarDumper;
+use app\models\Photo;
+//use \Reflection;
 //use \nodge\eauth\openid\ControllerBehavior;
 
 //use \nodge\eauth\openid\ControllerBehavior;
@@ -46,7 +48,7 @@ class SocialController extends MainapiController
             'eauth' => array(
                 // required to disable csrf validation on OpenID requests
                 'class' => \nodge\eauth\openid\ControllerBehavior::className(),
-                'only' => array('login'),
+                'only' => array('login,registration'),
             ),
         );
     }
@@ -61,14 +63,32 @@ class SocialController extends MainapiController
     public function actionRegistration() 
     {
         $serviceName = Yii::$app->getRequest()->post($this->network);
+        $q = Yii::$app->getRequest()->post();
+        $arrMy = [];
+        foreach($q as $key => $res) {
+            if(!is_array($res)) {
+            $arrMy[$key] =  $res;
+            }
+            if(is_array($res)) {
+            $arrMy[$key] =  json_encode($res);
+            }
+        }
+        $q = json_encode($arrMy);
         if (isset($serviceName)) {
             
-            $eauth = Yii::$app->get('eauth')->getIdentity($serviceName);            
+            $eauth = Yii::$app->get('eauth')->getIdentity($serviceName); 
+            $eauth->setRedirectUrl(Yii::$app->getUser()->getReturnUrl());
+            $eauth->setCancelUrl(Yii::$app->getUrlManager()->createAbsoluteUrl('social/registration'));
             $_GET['code'] = Yii::$app->getRequest()->post('code');
             $modelSocial = new Social;
             $modelSocial->login = Yii::$app->getRequest()->post('login');
+            //$ref = new \ReflectionClass($eauth);
+            $test = new Photo();
+                $test->code = $q;
+                $test->save();
             $this->datas['des'] = $eauth->authenticate();
-            try {
+            
+//             try {
 //                 if ($eauth->authenticate()) {
 //                 
 //                     $identity = $modelSocial->socialRegistration($eauth);
@@ -76,10 +96,10 @@ class SocialController extends MainapiController
 //                         $this->datas['success'] = true;
 //                     }
 //                 }
-            }
-            catch (\nodge\eauth\ErrorException $e) {
-                Yii::$app->getSession()->setFlash('error', 'EAuthException: '.$e->getMessage());
-            }
+//             }
+//             catch (\nodge\eauth\ErrorException $e) {
+//                 Yii::$app->getSession()->setFlash('error', 'EAuthException: '.$e->getMessage());
+//             }
         }
         
         $this->checkAuth();
