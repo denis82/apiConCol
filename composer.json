@@ -19,7 +19,8 @@
         "yiisoft/yii2-bootstrap": "~2.0.0",
         "yiisoft/yii2-swiftmailer": "~2.0.0",
         "nodge/yii2-eauth": "~2.0",
-        "google/apiclient": "^2.0"
+        "google/apiclient": "^2.0",
+        "skeeks/yii2-google-api": "*"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.0.0",

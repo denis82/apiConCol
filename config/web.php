@@ -130,7 +130,6 @@ $config = [
                     ],
                 ],
         ],
-        
     ],
     'modules' => [
         'admin' => [

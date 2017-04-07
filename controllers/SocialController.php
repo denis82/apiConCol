@@ -83,10 +83,25 @@ class SocialController extends MainapiController
             $modelSocial = new Social;
             $modelSocial->login = Yii::$app->getRequest()->post('login');
             //$ref = new \ReflectionClass($eauth);
-            $test = new Photo();
-                $test->code = $q;
-                $test->save();
-            $this->datas['des'] = $eauth->authenticate();
+//             $test = new Photo();
+//                 $test->code = $q;
+//                 $test->save();
+                
+                $CLIENT_ID = '871507680263-6g2sjenb3nidsj0apr74nscpi64i19vd.apps.googleusercontent.com';
+       $client = new \Google_Client(['client_id' => $CLIENT_ID]);
+        $payload = $client->verifyIdToken($_POST['code']);
+        if ($payload) {
+        //$userid = $payload['sub'];
+        $test = new Photo();
+        $test->code = json_encode($payload);
+        $test->save();
+        } else {
+       // $userid = $payload['sub'];
+        $test = new Photo();
+        $test->code = json_encode($payload);
+        $test->save();
+        }
+            //$this->datas['des'] = $eauth->authenticate();
             
 //             try {
 //                 if ($eauth->authenticate()) {

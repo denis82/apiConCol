@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "fa3a5d029c0de14e3d2cc97bf24a206d",
+    "content-hash": "cf74eeabe80daa0455d76b22a1953e8b",
     "packages": [
         {
             "name": "bower-asset/bootstrap",
@@ -1232,6 +1232,58 @@
                 "promises"
             ],
             "time": "2017-03-25T12:08:31+00:00"
+        },
+        {
+            "name": "skeeks/yii2-google-api",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/skeeks-semenov/yii2-google-api.git",
+                "reference": "2fa842fa941dc327b23f2d0fd5d8d049c8c001b7"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/skeeks-semenov/yii2-google-api/zipball/2fa842fa941dc327b23f2d0fd5d8d049c8c001b7",
+                "reference": "2fa842fa941dc327b23f2d0fd5d8d049c8c001b7",
+                "shasum": ""
+            },
+            "require": {
+                "google/apiclient": "^2.0.0@RC",
+                "google/apiclient-services": "*",
+                "yiisoft/yii2": "*"
+            },
+            "type": "yii2-extension",
+            "autoload": {
+                "psr-4": {
+                    "skeeks\\yii2\\googleApi\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0+"
+            ],
+            "authors": [
+                {
+                    "name": "Semenov Alexander",
+                    "email": "semenov@skeeks.com"
+                },
+                {
+                    "name": "SkeekS",
+                    "email": "support@skeeks.com",
+                    "homepage": "http://skeeks.com"
+                }
+            ],
+            "description": "Component for work with google api based on google/apiclient",
+            "homepage": "http://skeeks.com",
+            "keywords": [
+                "api",
+                "component",
+                "google",
+                "skeeks",
+                "yii",
+                "yii2"
+            ],
+            "time": "2016-03-28T14:21:37+00:00"
         },
         {
             "name": "swiftmailer/swiftmailer",
