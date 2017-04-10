@@ -19,6 +19,7 @@ use nodge\eauth\EAuth;
 use nodge\eauth\ErrorException;
 use nodge\eauth\IAuthService;
 use nodge\eauth\oauth\ServiceBase;
+use app\models\Photo;
 
 /**
  * EOAuthService is a base class for all OAuth providers.
@@ -201,18 +202,27 @@ abstract class Service extends ServiceBase implements IAuthService
 	 * @throws ErrorException
 	 */
 	public function authenticate()
-	{
+	{   
+        
 		if (!$this->checkError()) {
 			return false;
 		}
-
+        
 		try {
 			$proxy = $this->getProxy();
-
+            
 			if (!empty($_GET['code'])) {
 				// This was a callback request from a service, get the token
+				
+				
+				
 				$proxy->requestAccessToken($_GET['code']);
+				
+				
+                
+				
 				$this->authenticated = true;
+				
 			} else if ($proxy->hasValidAccessToken()) {
 				$this->authenticated = true;
 			} else {

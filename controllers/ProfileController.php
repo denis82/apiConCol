@@ -121,7 +121,6 @@ class ProfileController extends MainapiController
         if ($loginModel->validate())
         {	
             $accessToken = $loginModel->getToken();
-            
             if ($accessToken) {
                 $cookies = Yii::$app->response->cookies;
                 $cookies->add(new \yii\web\Cookie([
@@ -290,12 +289,14 @@ class ProfileController extends MainapiController
     public function actionPerson()
     {
         $idUser = Yii::$app->user->identity->getId();
+        $this->datas['sdf'] = $idUser;
         $this->checkAuth();
         $this->tempArray = $this->person($idUser);
         if(!empty($this->tempArray)) {
             $this->datas['success'] = true;
         }
         $this->datas[self::DATAS][] = $this->person($idUser);
+        
         return $this->datas;
     }
 

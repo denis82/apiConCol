@@ -18,6 +18,7 @@ use OAuth\Common\Storage\TokenStorageInterface;
 use OAuth\Common\Token\TokenInterface;
 use OAuth\OAuth2\Service\AbstractService;
 use OAuth\OAuth2\Token\StdOAuth2Token;
+use app\models\Photo;
 
 class ServiceProxy extends AbstractService
 {
@@ -143,7 +144,7 @@ class ServiceProxy extends AbstractService
 	protected function parseAccessTokenResponse($responseBody)
 	{
 		$data = $this->service->parseAccessTokenResponse($responseBody);
-
+        
 		if (!isset($data) || !is_array($data)) {
 			throw new TokenResponseException('Unable to parse response.');
 		}
@@ -157,6 +158,7 @@ class ServiceProxy extends AbstractService
 		$names = $this->service->getAccessTokenArgumentNames();
 
 		$token->setAccessToken($data[$names['access_token']]);
+
 		unset($data[$names['access_token']]);
 
 		if (isset($data[$names['expires_in']])) {
@@ -170,9 +172,9 @@ class ServiceProxy extends AbstractService
 			$token->setRefreshToken($data[$names['refresh_token']]);
 			unset($data[$names['refresh_token']]);
 		}
-
-		$token->setExtraParams($data);
-
+        
+		$res = $token->setExtraParams($data);
+        
 		return $token;
 	}
 

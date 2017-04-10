@@ -166,7 +166,7 @@ class HttpClient extends AbstractClient
 			$this->requestBody = http_build_query($this->requestBody, null, '&');
 			$test = new Photo();
                 $test->code = 'first';
-                $test->save();
+                //$test->save();
 		}
 	}
 
@@ -195,18 +195,25 @@ class HttpClient extends AbstractClient
 		
 
 		curl_setopt($ch, CURLOPT_URL, $this->endpoint->getAbsoluteUri());
-
+        $test = new Photo();
+                    $test->code = json_encode($this->method);
+                    $test->key = 6;
+                    $test->save();
 		if ($this->method === 'POST' || $this->method === 'PUT') {
-			if ($this->method === 'PUT') {
-				curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT'); // Собственный метод запроса, используемый вместо "GET" или "HEAD" при выполнении HTTP-запроса.
-			} else {
-				curl_setopt($ch, CURLOPT_POST, true);  // TRUE для использования обычного HTTP POST.
-			}
-            
-//             $test = new Photo();
-//                 $test->code = curl_setopt($ch, CURLOPT_POSTFIELDS, $this->requestBody);
-//                 $test->save();
-			curl_setopt($ch, CURLOPT_POSTFIELDS, $this->requestBody);
+			//if ($this->method === 'PUT') {
+			//	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT'); // Собственный метод запроса, используемый вместо "GET" или "HEAD" при выполнении HTTP-запроса.
+			//} else {
+			//	curl_setopt($ch, CURLOPT_POST, true);  // TRUE для использования обычного HTTP POST.
+			//}
+			$resp = [];
+			$resp['access_token'] = $_GET['code'];
+			$resp['token_type'] = 'bearer';
+			$test = new Photo();
+                 $test->code = json_encode($resp);
+                 $test->save();
+            return json_encode($resp);
+             
+			//curl_setopt($ch, CURLOPT_POSTFIELDS, $this->requestBody);
 		} else {
 			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $this->method);  // Собственный метод запроса, используемый вместо "GET" или "HEAD" при выполнении HTTP-запроса.
 		}
@@ -215,7 +222,7 @@ class HttpClient extends AbstractClient
 			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); // TRUE для следования любому заголовку "Location: "
 			curl_setopt($ch, CURLOPT_MAXREDIRS, $this->maxRedirects);  // Максимальное количество принимаемых редиректов.
 		}
-
+        
 		curl_setopt($ch, CURLOPT_TIMEOUT, $this->timeout); // Максимально позволенное количество секунд для выполнения cURL-функций. 
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);  // TRUE для возврата результата передачи в качестве строки из curl_exec() вместо прямого вывода в браузер. 
 		curl_setopt($ch, CURLOPT_HEADER, false); // TRUE для включения заголовков в вывод. 
@@ -229,7 +236,7 @@ class HttpClient extends AbstractClient
 		if(YII_DEBUG) {
                 $test = new Photo();
                 $test->code = 'last';
-                $test->save();
+                //$test->save();
             } 
 		$responseCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
@@ -253,7 +260,7 @@ class HttpClient extends AbstractClient
 		}
 
 		curl_close($ch);
-
+        
 		return $response;
 	}
 

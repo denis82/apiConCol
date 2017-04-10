@@ -14,7 +14,7 @@ use OAuth\OAuth2\Service\Exception\InvalidScopeException;
 use OAuth\OAuth2\Service\Exception\MissingRefreshTokenException;
 use OAuth\Common\Token\TokenInterface;
 use OAuth\Common\Token\Exception\ExpiredTokenException;
-
+use app\models\Photo;
 
 abstract class AbstractService extends BaseAbstractService implements ServiceInterface
 {
@@ -124,8 +124,9 @@ abstract class AbstractService extends BaseAbstractService implements ServiceInt
             $bodyParams,
             $this->getExtraOAuthHeaders()
         );
-        
+        // !!!!
         $token = $this->parseAccessTokenResponse($responseBody);
+                
         $this->storage->storeAccessToken($this->service(), $token);
 
         return $token;

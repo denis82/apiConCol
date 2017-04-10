@@ -5,6 +5,7 @@ namespace app\models;
 use Yii;
 use yii\base\Model;
 use app\models\User;
+use app\models\Registration;
 use yii\base\Security;
 use yii\base\ErrorException;
 
@@ -36,7 +37,7 @@ class Login extends Model
 		return [
 		
 			[['password'], 'required'],
-			['login','email'],
+			//['login','email'],
 			['password', 'valPassword'],
 		];
 	}
@@ -78,8 +79,14 @@ class Login extends Model
     
 	 public function getUser()
     {
-            return User::findOne(['user_login' => $this->login]);
-
+        return User::findOne(['user_login' => $this->login]);
+    }
+    
+     public function setPersonForUser($user)
+    {
+        $modelRegistration = new Registration(); 
+        $modelRegistration->createPerson = true;
+        return $modelRegistration->createEmptyPerson($user);
     }
     
     /**
@@ -91,26 +98,28 @@ class Login extends Model
     {
         if ($this->token === false) {
 
-			$userToken = $this->getUser();		
-			if(isset($userToken)) {
-					$generateToken = Yii::$app->security;
-					//$userToken->lastLoginTime = date('Y-m-d');
-					//$userToken->lastLoginIp = ip2long($this->userIp);
-					$userToken->access_token = $generateToken->generateRandomString();
-					if($userToken->validate()) {
-						$userToken->save();
-						return $userToken->access_token;
-					} else {
-						return false;
-					}
+            $userToken = $this->getUser();
+            
+            if(isset($userToken)) {
+                if(!$userToken->user_idPerson) {  // если персоны у юзера нет ее необходимо создать
+                    $this->setPersonForUser($userToken);
+                }
+                $generateToken = Yii::$app->security;
+                $userToken->access_token = $generateToken->generateRandomString();
+                if($userToken->validate()) {
+                    $userToken->save();
+                    return $userToken->access_token;
+                } else {
+                    return false;
+                    }
 
- 			}  else {
-				return false;
-			}
+            }  else {
+                return false;
+            }
         } else {
-			return false;
+            return false;
         }
-		//var_dump($userToken->access_token);die();
+        //var_dump($userToken->access_token);die();
         //return $userToken->access_token;
     }
     

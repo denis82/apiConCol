@@ -19,6 +19,7 @@ class Registration extends Model
 	public $work;
 	public $phone;
 	public $errors = [];
+	public $createPerson = false;
 	
     private $token;
     private $group = 1;
@@ -100,8 +101,8 @@ class Registration extends Model
                 $phonemail->info = $kind;
                 $phonemail->save();
             }
-        
-            $user = $this->createUser($person->id);
+                $user = $this->createUser($person->id);
+            
             
             if(!$user->hasErrors()) {
                 $success = true;
@@ -114,6 +115,40 @@ class Registration extends Model
         }
         return $success;
     } 
+    
+    public function createEmptyPerson($user)
+    {
+        $success = false;
+        $person = new Person();
+        $person->firstname = 'name';
+        $person->save();
+        if(!$person->hasErrors()) {
+            $RegistDatas = ['company' => 'company', 'work' => 'work', 'phone' => 'phone'];
+            foreach($RegistDatas as $key => $kind) {
+                $phonemail = new Phonemaildata();
+                if('phone' == $key) {
+                    $phonemail->group = $this->group;
+                }
+                $phonemail->idPerson = $person->id;
+                $phonemail->kind = $key;
+                $phonemail->info = $kind;
+                $phonemail->save();
+            }
+            $user->user_idPerson = $person->id;
+            $user->save();
+            
+            
+            if(!$user->hasErrors()) {
+                $success = true;
+            } else {
+                $this->errors[] = $user->errors;
+            }
+            
+        } else {
+            $this->errors[] = $person->errors;
+        }
+        return $success;
+    }
 
     private function createPerson()
     {
