@@ -202,7 +202,29 @@ class Data extends CommonLDC
             $tmpImg = array_slice(ArrayHelper::getColumn($event->galleries, 'gallery_image'), 0, 3);
             $list['image'] = $listImg;
             $button = $this->getButton($event['event_date']);
-
+            $seporator = [];
+            $arGallery = [];
+            $arList = [];
+            if($event['gallery_gr_id']) {
+                $seporator = [
+                                'type' => 'separator',
+                             ];
+                $arGallery = [
+                                "type" => "next",
+                                "name" => "Галерея",
+                                "kind" => "album",
+                                "id" => $event['gallery_gr_id']
+                             ];
+                $arList = [
+                                "type" => "list",
+                                "name" => "",
+                                "kind" => "all/photo",
+                                "style" => "default",
+                                "id" => $event['gallery_gr_id'],
+                                "itemStyle" => "rect",
+                                "fields" => $this->getArrEventGalleries($event->galleries)//$fieldsImg
+                           ];
+            }
             $list['fields'] = [
                                 [	
                                     'type' => 'group',
@@ -212,53 +234,57 @@ class Data extends CommonLDC
                                     'fields' =>  $button
                                 ],
 
-                                [
-                                    'type' => 'separator',
-                                ],
-
-                                [	'type' => 'text',
-                                    'name' => '', 
-                                    'info' => $event['event_detail_text'],//$event_detail_text,//str_replace("&shy;", '',$event['event_detail_text']),
-                                    "id" => $event['gallery_gr_id']
-                                ],
-
-                                [
-                                    'type' => 'separator',
-                                ],
-                                [
-                                    'type' => 'next',
-                                    'name' => 'Материалы', 
-                                    'kind' => 'data/resource',
-                                    "id" => $event['event_id']
-                                ],
-
-                                [
-                                    'type' => 'separator',
-                                ],
-                                
-                                    [
-                                    "type" => "next",
-                                    "name" => "Галерея",
-                                    "kind" => "album",
-                                    "id" => $event['gallery_gr_id']
-                                    ],
-                                    [
-                                    "type" => "list",
-                                    "name" => "",
-                                    "kind" => "all/photo",
-                                    "style" => "default",
-                                    "id" => $event['gallery_gr_id'],
-                                    "itemStyle" => "rect",
-                                    "fields" => $this->getArrEventGalleries($event->galleries)//$fieldsImg
-                                    ]
+//                                 [
+//                                     'type' => 'separator',
+//                                 ],
+// 
+//                                 [	'type' => 'text',
+//                                     'name' => '', 
+//                                     'info' => $event['event_detail_text'],//$event_detail_text,//str_replace("&shy;", '',$event['event_detail_text']),
+//                                     "id" => $event['gallery_gr_id']
+//                                 ],
+// 
+//                                 [
+//                                     'type' => 'separator',
+//                                 ],
+//                                 [
+//                                     'type' => 'next',
+//                                     'name' => 'Материалы', 
+//                                     'kind' => 'data/resource',
+//                                     "id" => $event['event_id']
+//                                 ],
+                                $seporator
+                                ,
+                                $arGallery
+                                ,
+                                $arList
                                 ,
 
 
                 ];
-
+                $list['fields'] = $this->arrFilter($list['fields']);
+                
             $this->tempArray[] = $list;
         }
         return $this->tempArray;
+    }
+    
+    
+    /**
+    * Отфильтрует массив от пустых заначений типа array()
+    * @param array массив для фильтрации
+    * @return array
+    */
+    
+    private function arrFilter($arr)
+    {
+        $temp = [];
+        foreach($arr as $val) {
+            if(!empty($val)) {
+                $temp[] = $val;
+            }
+        }
+        return $temp;
     }
     
     public function dataListPerson($ids,$infotype)

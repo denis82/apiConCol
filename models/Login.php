@@ -25,13 +25,25 @@ class Login extends Model
     public $rememberMe = true;
     public $checkToken = true;
 	public $token = false;
-    
     private $_user = false;
 	
-
+    public function attributeLabels()
+    {
+        return [
+            'login' => 'Логин',
+            'password' => 'Пароль',
+            'newPassword' => 'новый пароль',
+            'userIp' => 'ip адрес',
+            'token' => 'Токен',
+            'rememberMe' => 'Запомнить меня',
+            'checkToken' => 'Проверка токена',
+        ];
+    }
+    
     /**
      * @return array the validation rules.
      */
+     
 	public function rules()
 	{
 		return [
@@ -76,13 +88,23 @@ class Login extends Model
         return false;
     }
     
+    /**
+     * Получить пользователя по логину
+     * @return object
+     */
     
 	 public function getUser()
     {
         return User::findOne(['user_login' => $this->login]);
     }
     
-     public function setPersonForUser($user)
+    /**
+    * Если пользователь зарегистрировался через сайт то, ему необходимо создать персону при первой авторизации через приложение  
+    * @param object  пользователя
+    * @return object 
+    */
+    
+    public function setPersonForUser($user)
     {
         $modelRegistration = new Registration(); 
         $modelRegistration->createPerson = true;
@@ -90,10 +112,10 @@ class Login extends Model
     }
     
     /**
-     * 
-     *
-     * @return User|null
+     *  Возвращяет токен пользователя
+     * @return string
      */
+     
     public function getToken()
     {
         if ($this->token === false) {
@@ -119,45 +141,50 @@ class Login extends Model
         } else {
             return false;
         }
-        //var_dump($userToken->access_token);die();
-        //return $userToken->access_token;
     }
     
+    /**
+     * Сменить пароль
+     * @return boolean
+     */
+    
     public function updatePassword()
-	{
-		if($this->token) {
-			$user = User::find()
-						->where(['access_token' => explode(' ',$this->token)[1]])
-						->one();
-			$user->password = Yii::$app->getSecurity()->generatePasswordHash($this->newPassword);
-			if($user->save()) {
-			return true;
-			}
-		} else  {
-			return false;
-		}
-		
-	}
-	
-	public function logout($token = false)
-	{
-		if($token) {
-			$user = User::find()
-						->where(['access_token' => explode(' ',$token)[1]])
-						->one();
-			if(isset($user->access_token)) {
-				$user->access_token = '';
-				
-				if ($user->save()) { return true;} else { return false;}
-				
-				
-				
-			} else {
-				$this->checkToken  = false;
-				return   false;
-			}
-		} else {
-			return false;
-		}
-	}
+    {
+        if($this->token) {
+            $user = User::find()
+                        ->where(['access_token' => explode(' ',$this->token)[1]])
+                        ->one();
+            $user->password = Yii::$app->getSecurity()->generatePasswordHash($this->newPassword);
+            if($user->save()) {
+            return true;
+            }
+        } else  {
+            return false;
+        }
+        
+    }
+    
+    /**
+     * Разлогиниться
+     * @return boolean
+     */
+    
+    public function logout($token = false)
+    {
+        if($token) {
+            $user = User::find()
+                        ->where(['access_token' => explode(' ',$token)[1]])
+                        ->one();
+            if(isset($user->access_token)) {
+                $user->access_token = '';
+                
+                if ($user->save()) { return true;} else { return false;}
+            } else {
+                $this->checkToken  = false;
+                return   false;
+            }
+        } else {
+            return false;
+        }
+    }
 }

@@ -16,5 +16,10 @@ class Gallery extends ActiveRecord
     {
         return $this->hasMany(Label::className(), ['gallery_id' => 'gallery_id']);
     }
-
+    
+    public function getPersons()
+    {
+        return $this->hasMany(Person::className(), ['id' => 'idPerson'])
+            ->viaTable('{{%labels}}', ['gallery_id' => 'gallery_id']);
+    }
 }

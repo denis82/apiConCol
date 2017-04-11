@@ -427,7 +427,7 @@ class Catalog extends CommonLDC
             }
             $info[1] = Clearstr::clear($person['position']);
             ksort($info); 
-            $comp .= implode("\n", $info)."\n";
+            $comp .= implode("<br>", $info)."<br>";
         }
             return $comp;	
     }

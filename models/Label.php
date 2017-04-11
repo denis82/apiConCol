@@ -58,6 +58,11 @@ class Label extends ActiveRecord
             ];
     }
 
+    public function getPersons()
+    {
+        return $this->hasMany(Person::className(), ['id' => 'idPerson']);
+    }
+    
     /**
     * @return string имя таблицы
     */
@@ -85,13 +90,14 @@ class Label extends ActiveRecord
     public function getInfoLabel($idImage) 
     {
 
-        $modelLabel = Gallery::find()->with('labels')->where(['gallery_id' => $idImage])->all();
+        $modelLabel = Gallery::find()->with(['labels.persons'])->where(['gallery_id' => $idImage])->all();
         $k = 0;
         if($modelLabel) {
+            
             foreach($modelLabel as $img){
                 $tempArray = [];
-                $this->id_gall = $img->gallery_id;
-               
+                //$this->id_gall = $img->gallery_id;
+                
                 foreach ($img->labels as $label) {
                         $tempArray ['id'] = $label['id']; 
                         $tempArray ['left'] = $label['left'];
@@ -99,8 +105,13 @@ class Label extends ActiveRecord
                         $tempArray ['top'] = $label['top']; 
                         $tempArray ['bottom'] = $label['bottom'];
                         $tempArray ['person'] = $label['idPerson'];
-                        $tempArray ['name'] = $label['name'];
+                        $person = '';
+                        foreach($label->persons as $key =>$res) {
+                            $person= $res->surname .' '. $res->firstname;
+                        }
+                        $tempArray ['name'] = $person;
                         $tempArray ['info'] = $label['info'];
+                        
                         $dataResult['labels'][] = $tempArray;    
                 }
                 $tempArray = [];

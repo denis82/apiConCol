@@ -83,38 +83,56 @@ class Registration extends Model
     
     }
     
+    /**
+    * Вызывает модели для создания записи в базе  
+    * @return boolean/errors
+    */
     
     public function signup()
     {
         $success = false;
-        $person = $this->createPerson();
+        $userModel = new User();
+        $userModel->user_login = $this->login;
+        $userModel->user_password = $this->password;
         
-        if(!$person->hasErrors()) {
-            $RegistDatas = ['company' => $this->company, 'work' => $this->work, 'phone' => $this->phone];
-            foreach($RegistDatas as $key => $kind) {
-                $phonemail = new Phonemaildata();
-                if('phone' == $key) {
-                    $phonemail->group = $this->group;
+        if($userModel->validate()) {
+            $person = $this->createPerson();
+            
+            if(!$person->hasErrors()) {
+                $RegistDatas = ['company' => $this->company, 'work' => $this->work, 'phone' => $this->phone];
+                foreach($RegistDatas as $key => $kind) {
+                    $phonemail = new Phonemaildata();
+                    if('phone' == $key) {
+                        $phonemail->group = $this->group;
+                    }
+                    $phonemail->idPerson = $person->id;
+                    $phonemail->kind = $key;
+                    $phonemail->info = $kind;
+                    $phonemail->save();
                 }
-                $phonemail->idPerson = $person->id;
-                $phonemail->kind = $key;
-                $phonemail->info = $kind;
-                $phonemail->save();
-            }
-                $user = $this->createUser($person->id);
-            
-            
-            if(!$user->hasErrors()) {
-                $success = true;
+                    $user = $this->createUser($person->id);
+                
+                
+                if(!$user->hasErrors()) {
+                    $success = true;
+                } else {
+                    $this->errors[] = $user->errors;
+                }
+                
             } else {
-                $this->errors[] = $user->errors;
+                $this->errors[] = $person->errors;
             }
-            
         } else {
-            $this->errors[] = $person->errors;
-        }
+                $this->errors[] = $userModel->errors;
+        }    
         return $success;
     } 
+    
+    /**
+    * Создает пользователя с дефолтными значениями  
+    * @param object  пользователя
+    * @return object 
+    */
     
     public function createEmptyPerson($user)
     {
@@ -150,6 +168,11 @@ class Registration extends Model
         return $success;
     }
 
+    /**
+    * Содает запись персоны в базе  
+    * @return object
+    */
+    
     private function createPerson()
     {
         $person = new Person();
@@ -161,6 +184,12 @@ class Registration extends Model
         }
         return $person;
     }
+    
+    /**
+    * Содает запись пользователя в базе
+    * @param integer  ид персоны
+    * @return object
+    */
     
     private function createUser($id = false)
     {

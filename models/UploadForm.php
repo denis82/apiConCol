@@ -23,6 +23,15 @@ class UploadForm extends Model
         ];
     }
     
+    public function attributeLabels()
+    {
+        return [
+            'file' => 'Имя файла',
+            'width' => 'Ширина',
+            'height' => 'Высота',
+        ];
+    }
+    
     /*  Загружает фотку на сервер, удаляет старую(опционально) 
 	/	вход: 	$path - путь по которому сохранить фотку
 				$imgForDelete - название фотки которую нужно удалить

@@ -10,28 +10,39 @@ use app\models\Photo;
 
 class User extends ActiveRecord implements IdentityInterface
 {
- 	public $id;
- 	public $username;
-    public $password;
+    public $id;
+    public $username;
+    //public $password;
     public $authKey;
- 	//public $user_idPerson;
+    //public $user_idPerson;
+    
+    public function attributeLabels()
+    {
+        return [
+            'username' => 'Имя',
+            'authKey' => 'ключ авторизации',
+            'id' => 'Ид пользователя',
+            'user_login'=> 'Логин',
+            'user_password'=> 'Пароль',
+        ];
+    }
+    
+    public function rules()
+    {
+        return [
+            
+                [['user_login','user_password'], 'required','message'=>'Обязательно для заполнения {attribute}.'],
+                //['user_login','email','message'=>'Не валидный email {attribute}.'],
+                ['user_login', 'unique','message'=>'Пользователь с таким логином уже существует.']
+            ];
+    }
 
-	public function rules()
-	{
-		return [
-			
-				[['user_login','user_password'], 'required','message'=>'Обязательно для заполнения {attribute}.'],
-				//['user_login','email','message'=>'Не валидный email {attribute}.'],
-				['user_login', 'unique','message'=>'Пользователь с таким логином уже существует.']
-			];
-	}
-	
-	 public static function tableName()
+    public static function tableName()
     {
         return "user" ;
     }
     
-	public function getPhonemaildatas()
+    public function getPhonemaildatas()
     {
         return $this->hasMany(Phonemaildata::className(), ['idUser' => 'id']);
     }
@@ -42,7 +53,7 @@ class User extends ActiveRecord implements IdentityInterface
             ->viaTable('companyUser', ['idUser' => 'idUser']);
     }
 
-	public static function findIdentityByAccessToken($token, $type = null)
+    public static function findIdentityByAccessToken($token, $type = null)
     {
         return self::findOne(['access_token' => $token]);
     }
@@ -61,6 +72,7 @@ class User extends ActiveRecord implements IdentityInterface
      * @return User
      * @throws ErrorException
      */
+     
     public static function findByEAuth($service) {
             
         if (!$service->getIsAuthenticated()) {
@@ -83,13 +95,8 @@ class User extends ActiveRecord implements IdentityInterface
     
     public function getId()
     {
-        
-    $test = new Photo();
-            $test->code = $this->user_idPerson;
-            $test->key = 7;
-            $test->save();
-		$this->id = $this->user_idPerson;
-		return $this->id;
+        $this->id = $this->user_idPerson;
+        return $this->id;
     }
     
     public function getAuthKey()

@@ -10,43 +10,54 @@ use yii\base\ErrorException;
 
 class Updatepassword extends Model
 {
-	public $token;
-	public $newPassword;
-	public $password;
-	/**
+    public $token;
+    public $newPassword;
+    public $password;
+
+    /**
     * @var array
     */
+    
     public $dataResult = [];
     
     
-	public function rules()
-	{
-		return [
-			[['password', 'newPassword'], 'required'],
-			['password', 'validatePassword'],
-		];
-	}
-	
-	public function validatePassword($attribute, $params)
+    public function rules()
     {
-		if (!$this->hasErrors()) {
-			$user = $this->getUser();
-			
-			if($user) {
-				if ($user->user_password != md5($this->password)){
-					$this->addError($attribute, 'Пароль не верный.');
-				}
-			}	
-		}
+        return [
+            [['password', 'newPassword'], 'required'],
+            ['password', 'validatePassword'],
+        ];
     }
-	
-	
-	public function getUser()
+
+    /**
+    * валидация пароля
+    * @return error 
+    */
+    
+    public function validatePassword($attribute, $params)
     {
-		return User::findOne(['access_token' => explode(' ',$this->token)[1]]);
+        if (!$this->hasErrors()) {
+            $user = $this->getUser();
+            
+            if($user) {
+                if ($user->user_password != md5($this->password)){
+                    $this->addError($attribute, 'Пароль не верный.');
+                }
+            }
+        }
     }
-	
-	 /**
+
+    /**
+    * Возвращает объект пользователя
+    * @return object 
+    */
+    
+    public function getUser()
+    {
+        return User::findOne(['access_token' => explode(' ',$this->token)[1]]);
+    }
+
+    /**
     * Обновление пароля пользователя
     * @param string   $newPassword  пароль пользователя
     * @param string   $oldPassword  старый пароль
@@ -54,9 +65,9 @@ class Updatepassword extends Model
     * @param string   $middlename  Отчество
     * @return boolean/errors 
     */
-	
-	public function updatePassword()
-	{
+
+    public function updatePassword()
+    {
         $this->dataResult['success'] = false;
         $header = Yii::$app->request->cookies;
         $authToken = $header->getValue('token', false);

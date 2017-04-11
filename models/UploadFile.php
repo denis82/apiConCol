@@ -21,6 +21,13 @@ class UploadFile extends Model
         ];
     }
     
+        public function attributeLabels()
+    {
+        return [
+            'imageFile' => 'Файл изображения',
+        ];
+    }
+    
     public function upload($model)
     {
         if ($model->file && $model->validate()) {
