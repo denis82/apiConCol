@@ -126,15 +126,16 @@ class SocialController extends MainapiController
     
     
     public function actionRegistration() 
-    {
+    {!
         $serviceName = Yii::$app->getRequest()->post($this->network);
         $test = new Photo();
                     $test->code = $serviceName;
                     $test->save();
         $code = Yii::$app->getRequest()->post('code');
+        
 
         if (isset($serviceName)) {
-           
+            
             
             
             switch ($serviceName) {
@@ -155,7 +156,7 @@ class SocialController extends MainapiController
 
                     // установка URL и других необходимых параметров
                     curl_setopt($chq, CURLOPT_URL, "https://api.vk.com/method/secure.checkToken");
-                    curl_setopt($chq, CURLOPT_POSTFIELDS,"token=".$code."&client_secret=cy04orm3YTFnwKycGR5S&access_token=".$tok->access_token);
+                    curl_setopt($chq, CURLOPT_POSTFIELDS,"token=".$code."&client_secret=cy04orm3YTFnwKycGR5S&access_token=".$tok->access_token."!");
                     
                     curl_setopt($chq, CURLOPT_HEADER, 0);
                     curl_setopt($chq, CURLOPT_RETURNTRANSFER, 1);
@@ -168,7 +169,40 @@ class SocialController extends MainapiController
                     
                     break;
                 case 'google_oauth':
+                    $eauth = Yii::$app->get('eauth')->getIdentity($serviceName);
+                    $eauth->setRedirectUrl(Yii::$app->getUser()->getReturnUrl());
+                    $eauth->setCancelUrl(Yii::$app->getUrlManager()->createAbsoluteUrl('social/registration'));
+                    $_GET['code'] = Yii::$app->getRequest()->post('code');
+                    $_GET['login'] = Yii::$app->getRequest()->post('login');
+                    $modelSocial = new Social;
+                    $modelSocial->login = Yii::$app->getRequest()->post('login');
+                    $eauth->authenticate();
+                    $test = User::findByEAuth($eauth);
+                    
+                    $file = '/var/www/picomsu/data/www/con-col-lp.picom.su/test.txt';
+                    
+                    $current = json_encode($test);
+                    // Пишем содержимое обратно в файл
+                    file_put_contents($file, $current);
                     break;
+                case 'facebook':
+                    $eauth = Yii::$app->get('eauth')->getIdentity($serviceName);
+                    $eauth->setRedirectUrl(Yii::$app->getUser()->getReturnUrl());
+                    $eauth->setCancelUrl(Yii::$app->getUrlManager()->createAbsoluteUrl('social/registration'));
+                    $_GET['code'] = Yii::$app->getRequest()->post('code');
+                    $_GET['login'] = Yii::$app->getRequest()->post('login');
+                    $modelSocial = new Social;
+                    $modelSocial->login = Yii::$app->getRequest()->post('login');
+                    $test = $eauth->authenticate();
+                    
+                    $file = '/var/www/picomsu/data/www/con-col-lp.picom.su/test.txt';
+                    
+                    $current = json_encode($test);
+                    // Пишем содержимое обратно в файл
+                    file_put_contents($file, $current);
+                    
+                    break;    
+                    
             }
             
             

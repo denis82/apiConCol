@@ -91,7 +91,6 @@ class Label extends ActiveRecord
     {
 
         $modelLabel = Gallery::find()->with(['labels.persons'])->where(['gallery_id' => $idImage])->all();
-        $k = 0;
         if($modelLabel) {
             
             foreach($modelLabel as $img){

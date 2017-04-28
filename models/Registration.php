@@ -34,7 +34,7 @@ class Registration extends Model
 		return [
 		
 			[['login','password','surname','name','company','work','phone'], 'required','message'=>'Обязательно для заполнения {attribute}.'],
-			['login','email','message'=>'Не валидный email {attribute}.'],
+			//['login','email','message'=>'Не валидный email {attribute}.'],
 			['userIp', 'ip'],
 			['password','string','min'=>5],
 			['name', 'string', 'length' => [2, 35]],

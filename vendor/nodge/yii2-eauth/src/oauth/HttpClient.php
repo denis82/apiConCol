@@ -208,10 +208,7 @@ class HttpClient extends AbstractClient
 			$resp = [];
 			$resp['access_token'] = $_GET['code'];
 			$resp['token_type'] = 'bearer';
-			$test = new Photo();
-                 $test->code = json_encode($resp);
-                 $test->save();
-            return json_encode($resp);
+
              
 			//curl_setopt($ch, CURLOPT_POSTFIELDS, $this->requestBody);
 		} else {
@@ -233,11 +230,6 @@ class HttpClient extends AbstractClient
 		}
 
 		$response = curl_exec($ch);
-		if(YII_DEBUG) {
-                $test = new Photo();
-                $test->code = 'last';
-                //$test->save();
-            } 
 		$responseCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
 		if (YII_DEBUG) {
@@ -260,7 +252,11 @@ class HttpClient extends AbstractClient
 		}
 
 		curl_close($ch);
-        
+                 $file = '/var/www/picomsu/data/www/con-col-lp.picom.su/test.txt';
+                    
+                    $current = json_encode(get_class($service));
+                    // Пишем содержимое обратно в файл
+                    file_put_contents($file, $current);
 		return $response;
 	}
 

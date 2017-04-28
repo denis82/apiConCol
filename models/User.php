@@ -74,13 +74,13 @@ class User extends ActiveRecord implements IdentityInterface
      */
      
     public static function findByEAuth($service) {
-            
+                  
         if (!$service->getIsAuthenticated()) {
             throw new ErrorException('EAuth user should be authenticated before creating identity.');
         }
         
-        $id = $service->getServiceName().'-'.$service->getId();
-        
+        $id = $service->getServiceName().'-'.$service->getId();// !!!!!!!!
+
         $attributes = [
             'id' => $id,
             'username' => $service->getAttribute('name'),
@@ -89,7 +89,7 @@ class User extends ActiveRecord implements IdentityInterface
         ];
         $attributes['profile']['service'] = $service->getServiceName();
        // Yii::$app->getSession()->set('user-'.$id, $attributes);
-        
+  
         return new self($attributes);
     }
     
